@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Word {
+  id           String        @id @default(cuid())
+  headword     String
+  root         String?
+  ergative     String?
+  speechPart   String?
+  origin       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  translations Translation[]
+  examples     Example[]
+  tags         Tag[]
+}
+
+model Translation {
+  id          String   @id @default(cuid())
+  translation String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  word        Word     @relation(fields: [wordId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wordId      String
+}
+
+model Example {
+  id          String   @id @default(cuid())
+  example     String
+  translation String
+  word        Word     @relation(fields: [wordId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  wordId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  words     Word[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

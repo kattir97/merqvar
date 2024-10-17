@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";

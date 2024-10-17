@@ -1,8 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilLine, Trash2, ArrowUpDown } from "lucide-react";
+import { PencilLine, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 
 const AdminWordSchema = z.object({
   headword: z.string(),
@@ -16,17 +15,8 @@ type AdminWord = z.infer<typeof AdminWordSchema>;
 export const columns: ColumnDef<AdminWord>[] = [
   {
     accessorKey: "headword",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Слово
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    enableSorting: true,
+    header: "Слово",
   },
   {
     accessorKey: "translations",
@@ -46,6 +36,7 @@ export const columns: ColumnDef<AdminWord>[] = [
   },
   {
     accessorKey: "createdAt",
+    enableSorting: true,
     header: "Добавлено",
     cell: ({ row }) => {
       const date = row.getValue("createdAt") as string;

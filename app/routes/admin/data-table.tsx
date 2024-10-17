@@ -1,14 +1,4 @@
-import { useNavigate, useNavigation } from "@remix-run/react";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  SortingState,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 import {
   Table,
@@ -18,6 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { Pagination } from "./pagination";
+import { useNavigation, useNavigate, Form, NavLink } from "@remix-run/react";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -25,6 +21,8 @@ interface DataTableProps<TData, TValue> {
   totalWords: number;
   page: number;
   pageSize: number;
+  sorting: { sortBy: string; order: string };
+  globalFilter: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -33,10 +31,11 @@ export function DataTable<TData, TValue>({
   totalWords,
   page,
   pageSize,
+  sorting,
+  globalFilter,
 }: DataTableProps<TData, TValue>) {
-  const navigate = useNavigate();
   const pageCount = Math.ceil(totalWords / pageSize);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [filter, setFilter] = useState(globalFilter);
 
   const table = useReactTable({
     data,
@@ -45,40 +44,63 @@ export function DataTable<TData, TValue>({
     manualPagination: true,
     pageCount,
     manualSorting: true,
+    manualFiltering: true,
     state: {
       pagination: {
         pageIndex: page - 1,
         pageSize,
       },
-      sorting: {
-        sorting,
-      },
+      sorting: [{ id: sorting.sortBy, desc: sorting.order === "desc" }],
     },
-    onSortingChange: setSorting,
   });
 
-  const handlePageChange = (newPage: number) => {
-    // Build the new URL with updated query params (page number)
-    const newUrl = new URL(window.location.href);
-    newUrl.searchParams.set("page", String(newPage + 1));
-    navigate(`${newUrl.pathname}?${newUrl.searchParams.toString()}`, {
-      replace: true, // Update the URL without triggering a full page reload
-    });
-  };
-
+  // ===== PAGINATION ======  //
   const navigation = useNavigation();
   const isLoading = navigation.state === "loading";
+  const navigate = useNavigate();
+
+  // Handle sorting by updating the URL when a column header is clicked
+  const handleSort = (columnId: string) => {
+    const column = table.getColumn(columnId);
+    // Check if the column is sortable
+    if (!column?.columnDef.enableSorting) {
+      return; // If the column is not sortable, do nothing
+    }
+
+    const newSortOrder = sorting.order === "asc" ? "desc" : "asc";
+    navigate(
+      `?page=${page}&pageSize=${pageSize}&sortBy=${columnId}&order=${newSortOrder}&filter=${globalFilter}`
+    );
+  };
+
+  // Handle global filter input change and update the URL
+  const handleFilterChange = (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log(filter);
+    // Update the URL with the new filter, maintaining page, pageSize, sortBy, and order
+    navigate(
+      `?page=${(page = 1)}&pageSize=${pageSize}&sortBy=${sorting.sortBy}&order=${
+        sorting.order
+      }&filter=${encodeURIComponent(filter)}`
+    );
+
+    setFilter("");
+  };
 
   return (
     <div className={isLoading ? "opacity-50" : "opacity-100"}>
-      <div className="flex items-center py-4">
+      <Form onSubmit={handleFilterChange} className="flex items-center justify-between py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("headword")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("headword")?.setFilterValue(event.target.value)}
+          placeholder="Искать..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
           className="max-w-sm"
+          disabled={isLoading}
         />
-      </div>
+        <Button variant="default" disabled={isLoading}>
+          <NavLink to="add-word">Добавить слово</NavLink>
+        </Button>
+      </Form>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -87,9 +109,31 @@ export function DataTable<TData, TValue>({
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.isPlaceholder ? null : (
+                        <button
+                          // Ensure the button always renders, but handle client-side logic after hydration
+                          onClick={() => handleSort(header.column.id)}
+                          // Ensure sorting indicator is consistent
+                          disabled={!header.column.columnDef.enableSorting} // Disable sorting on non-sortable columns
+                          className="flex items-center"
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {/* Sorting indicator only for client-side */}
+                          {/* Always render arrows, but adjust visibility */}
+                          <span className="ml-2">
+                            {header.column.getIsSorted() === "asc" ? (
+                              <ArrowUp size={20} />
+                            ) : header.column.getIsSorted() === "desc" ? (
+                              <ArrowDown size={20} />
+                            ) : (
+                              <span className="opacity-0">
+                                {/* Placeholder arrow to maintain DOM structure */}
+                                <ArrowUp size={20} />
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      )}
                     </TableHead>
                   );
                 })}
@@ -116,25 +160,7 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        <div className="flex items-center justify-end space-x-2 py-4 mr-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(page - 2)}
-            disabled={page === 1 || isLoading}
-          >
-            Previous
-          </Button>
-          <span>{`Page ${page} of ${pageCount}`}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(page)}
-            disabled={page >= pageCount || isLoading}
-          >
-            Next
-          </Button>
-        </div>
+        <Pagination isLoading={isLoading} page={page} pageCount={pageCount} />
       </div>
     </div>
   );

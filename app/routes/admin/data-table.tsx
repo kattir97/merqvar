@@ -76,7 +76,6 @@ export function DataTable<TData, TValue>({
   // Handle global filter input change and update the URL
   const handleFilterChange = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(filter);
     // Update the URL with the new filter, maintaining page, pageSize, sortBy, and order
     navigate(
       `?page=${(page = 1)}&pageSize=${pageSize}&sortBy=${sorting.sortBy}&order=${
@@ -84,23 +83,26 @@ export function DataTable<TData, TValue>({
       }&filter=${encodeURIComponent(filter)}`
     );
 
-    setFilter("");
+    // setFilter("");
   };
 
   return (
     <div className={isLoading ? "opacity-50" : "opacity-100"}>
-      <Form onSubmit={handleFilterChange} className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Искать..."
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="max-w-sm"
-          disabled={isLoading}
-        />
+      <div className="flex items-center justify-between py-4">
+        <Form onSubmit={handleFilterChange} className="flex flex-1">
+          <Input
+            placeholder="Искать..."
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="max-w-sm"
+            disabled={isLoading}
+          />
+        </Form>
         <Button variant="default" disabled={isLoading}>
           <NavLink to="add-word">Добавить слово</NavLink>
         </Button>
-      </Form>
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -154,7 +156,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Ничего не найдено.
                 </TableCell>
               </TableRow>
             )}

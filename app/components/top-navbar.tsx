@@ -6,7 +6,9 @@ const TopNavbar: React.FC = () => {
       <Link to="/" className="">
         Мярхъвар
       </Link>
-      <Link to="/admin">Админка</Link>
+      <Link to="/admin" prefetch="intent">
+        Админка
+      </Link>
     </nav>
   );
 };

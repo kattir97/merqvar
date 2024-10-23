@@ -51,8 +51,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       where: whereClause,
       select: {
         headword: true,
+        ergative: true,
         speechPart: true,
+        origin: true,
+        root: true,
+        tags: true,
         createdAt: true,
+        examples: true,
         translations: {
           select: { translation: true },
         },

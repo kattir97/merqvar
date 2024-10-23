@@ -13,6 +13,7 @@ datasource db {
 model Word {
   id           String        @id @default(cuid())
   headword     String
+  audio        String?
   root         String?
   ergative     String?
   speechPart   String

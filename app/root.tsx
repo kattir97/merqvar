@@ -1,8 +1,9 @@
-import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
+import { json, Links, Meta, Outlet, Scripts, useLoaderData } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
 import { TopNavbar } from "./components/top-navbar";
+import { getEnv } from "./utils/env.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -35,7 +36,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export async function loader() {
+  return json({ ENV: getEnv() });
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const data = useLoaderData<typeof loader>();
   return (
     <html lang="ru">
       <head>
@@ -49,6 +55,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         {/* <ScrollRestoration /> */}
         <Scripts />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+          }}
+        ></script>
       </body>
     </html>
   );

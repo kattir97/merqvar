@@ -15,7 +15,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   // Sorting parameters
   const sortBy = url.searchParams.get("sortBy") || "createdAt"; // Default to "createdAt"
-  const order = url.searchParams.get("order") === "desc" ? "desc" : "asc"; // Default to "asc"
+  const order = url.searchParams.get("order") === "asc" ? "asc" : "desc"; // Default to "desc"
 
   // Validate the sorting field, allowing only headword and createdAt
   const allowedSortFields = ["headword", "createdAt"];

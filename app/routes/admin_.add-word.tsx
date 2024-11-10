@@ -2,56 +2,120 @@ import { Form, useActionData } from "@remix-run/react";
 import { Container } from "~/components/container";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { getFormProps, getInputProps, useForm } from "@conform-to/react";
+import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { z } from "zod";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
 // import { MinusCircleIcon, PlusCircleIcon } from "lucide-react";
 import { Translations } from "~/components/translations";
-const wordSchema = z.object({
+import { SpeechPart } from "~/components/speech-part";
+import { Button } from "~/components/ui/button";
+import { Origin } from "~/components/origin";
+import { saveWord } from "~/utils/save-word";
+import { Examples } from "~/components/examples";
+import { prisma } from "~/utils/db.server";
+
+export const wordSchema = z.object({
   headword: z.string({ required_error: "Требуется слово" }).min(1).max(100),
+  root: z.string().min(1).max(100).optional(),
+  ergative: z.string().min(1).max(100).optional(),
+  speechPart: z.enum(["существительное", "прилагательное", "глагол", "междометие", "числительное"]),
+  origin: z.enum(["агульский", "персидский", "арабский", "русский", "тюркский"]).optional(),
   translations: z.array(z.string({ required_error: "Требуется перевод" }).min(1)).min(1),
+  examples: z
+    .array(
+      z.object({
+        example: z.string().optional(),
+        translation: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
+  const data = Object.fromEntries(formData.entries());
+  console.log("data", data);
 
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
+    console.log("Submission failed:", submission.error);
+    console.log(true);
     return submission.reply();
   }
+
+  const wordToSave = await saveWord(data);
+  // console.log("wordToSave: ", wordToSave);
+  const result = await prisma.word.create(wordToSave);
+
+  return result;
 }
 
 export default function AddWord() {
   type WordFormFields = z.infer<typeof wordSchema>;
   const lastResult = useActionData<typeof action>();
   const [form, fields] = useForm<WordFormFields>({
-    lastResult,
+    lastResult: lastResult as SubmissionResult,
     constraint: getZodConstraint(wordSchema),
-    shouldValidate: "onInput",
+    shouldValidate: "onBlur",
     defaultValue: {
+      headword: "",
+      root: "",
+      ergative: "",
+      speechPart: "",
       translations: [""],
+      examples: [
+        {
+          example: "",
+          translation: "",
+        },
+      ],
     },
   });
-
-  // const translations = fields.translations.getFieldList();
-
   return (
     <Container>
+      <h1 className="mb-4 text-xl">Добавить слово</h1>
       <Form method="POST" {...getFormProps(form)}>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
+        <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="flex flex-col gap-2">
             <fieldset>
-              <Label htmlFor={fields.headword.id}>Слово</Label>
-              <Input {...getInputProps(fields.headword, { type: "text" })} />
+              <Label htmlFor={fields.headword.id} className="sr-only">
+                Слово
+              </Label>
+              <Input {...getInputProps(fields.headword, { type: "text" })} placeholder="Слово" />
               <ErrorList id={fields.headword.errorId} errors={fields.headword.errors} />
+            </fieldset>
+            <fieldset>
+              <Label htmlFor={fields.root.id} className="sr-only">
+                Корень
+              </Label>
+              <Input {...getInputProps(fields.root, { type: "text" })} placeholder="Корень" />
+              <ErrorList id={fields.root.errorId} errors={fields.root.errors} />
+            </fieldset>
+            <fieldset>
+              <Label htmlFor={fields.ergative.id} className="sr-only">
+                Эргатив
+              </Label>
+              <Input {...getInputProps(fields.ergative, { type: "text" })} placeholder="Эргатив" />
+              <ErrorList id={fields.ergative.errorId} errors={fields.ergative.errors} />
+            </fieldset>
+            <fieldset>
+              <SpeechPart form={form} fields={fields} />
+            </fieldset>
+            <fieldset>
+              <Origin form={form} fields={fields} />
             </fieldset>
           </div>
           <Translations form={form} fields={fields} />
         </div>
+        <h2 className="mb-2">Примеры: </h2>
+        <Examples form={form} fields={fields} />
       </Form>
+      <Button form={form.id} type="submit" className="my-10">
+        Добавить
+      </Button>
     </Container>
   );
 }

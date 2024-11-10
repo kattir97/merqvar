@@ -98,9 +98,11 @@ export function DataTable<TData, TValue>({
             disabled={isLoading}
           />
         </Form>
-        <Button variant="default" disabled={isLoading}>
-          <NavLink to="add-word">Добавить слово</NavLink>
-        </Button>
+        <NavLink to="add-word">
+          <Button variant="default" disabled={isLoading}>
+            Добавить слово
+          </Button>
+        </NavLink>
       </div>
 
       <div className="rounded-md border">

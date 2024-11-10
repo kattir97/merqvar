@@ -10,30 +10,35 @@ type WordFormFields = z.infer<typeof wordSchema>;
 
 type UseFormReturnType = ReturnType<typeof useForm<WordFormFields>>;
 
-interface TranslationsProps {
+interface ExamplesProps {
   form: UseFormReturnType[0];
   fields: UseFormReturnType[1];
 }
 
-export const Translations = ({ form, fields }: TranslationsProps) => {
-  const translations = fields.translations.getFieldList();
+export const Examples = ({ form, fields }: ExamplesProps) => {
+  const examples = fields.examples.getFieldList();
   return (
     <div>
-      <Label htmlFor={fields.translations.id} className="sr-only">
+      <Label htmlFor={fields.examples.id} className="sr-only">
         Перевод
       </Label>
       <div className="flex flex-col gap-2">
-        {translations.map((ts, index) => (
-          <div className="" key={ts.key}>
+        {examples.map((ex, index) => (
+          <div className="" key={ex.key}>
             <div className="flex gap-2 items-center">
               <Input
-                name={ts.name}
+                name={`examples${index}.example`}
+                placeholder={`Пример ${index + 1}`}
+                defaultValue={ex.initialValue?.example}
+              />
+              <Input
+                name={`examples${index}.translation`}
                 placeholder={`Перевод ${index + 1}`}
-                defaultValue={ts.initialValue}
+                defaultValue={ex.initialValue?.translation}
               />
               <button
                 {...form.insert.getButtonProps({
-                  name: fields.translations.name,
+                  name: fields.examples.name,
                   index: index + 1,
                 })}
               >
@@ -42,10 +47,10 @@ export const Translations = ({ form, fields }: TranslationsProps) => {
                   size={24}
                 />
               </button>
-              {translations.length > 1 && (
+              {examples.length > 1 && (
                 <button
-                  {...form.remove.getButtonProps({ name: fields.translations.name, index })}
-                  disabled={translations.length === 1}
+                  {...form.remove.getButtonProps({ name: fields.examples.name, index })}
+                  disabled={examples.length === 1}
                 >
                   <MinusCircleIcon
                     className="hover:text-red-500 transition-all duration-200 cursor-pointer"
@@ -54,7 +59,7 @@ export const Translations = ({ form, fields }: TranslationsProps) => {
                 </button>
               )}
             </div>
-            <ErrorList id={ts.id} errors={ts.errors} />
+            <ErrorList id={ex.id} errors={ex.errors} />
           </div>
         ))}
       </div>

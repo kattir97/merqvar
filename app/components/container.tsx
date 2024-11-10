@@ -6,5 +6,5 @@ interface ContainerProps {
 }
 
 export const Container = ({ children, maxWidth = "max-w-5xl" }: ContainerProps): JSX.Element => {
-  return <div className={`flex flex-col ${maxWidth} mt-10 mx-auto`}>{children}</div>;
+  return <div className={`flex flex-col ${maxWidth} mt-10 mx-auto h-full`}>{children}</div>;
 };

@@ -5,6 +5,7 @@ import { ErrorList } from "./error-list";
 import { useForm } from "@conform-to/react";
 import { wordSchema } from "~/routes/admin_.add-word";
 import { z } from "zod";
+import { useState } from "react";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 
@@ -16,7 +17,31 @@ interface ExamplesProps {
 }
 
 export const Examples = ({ form, fields }: ExamplesProps) => {
-  const examples = fields.examples.getFieldList();
+  const [examples, setExamples] = useState(fields.examples.getFieldList());
+
+  const handleAddExample = (event: React.MouseEvent) => {
+    event.preventDefault();
+
+    const baseField = fields.examples.getFieldList()[0];
+
+    const newExample = {
+      ...baseField,
+      key: `example-${examples.length}`, // Unique key for each example
+      name: `${fields.examples.name}[${examples.length}]`,
+      id: `${fields.examples.id}-${examples.length}`,
+      errorId: `${fields.examples.errorId}-${examples.length}`,
+      descriptionId: `${fields.examples.descriptionId}-${examples.length}`,
+      initialValue: { example: "", translation: "" },
+      errors: [],
+    };
+
+    setExamples([...examples, newExample]);
+  };
+
+  const handleRemoveExample = (idx: number) => {
+    setExamples(examples.filter((_, i) => i !== idx));
+  };
+
   return (
     <div>
       <Label htmlFor={fields.examples.id} className="sr-only">
@@ -37,10 +62,11 @@ export const Examples = ({ form, fields }: ExamplesProps) => {
                 defaultValue={ex.initialValue?.translation}
               />
               <button
-                {...form.insert.getButtonProps({
-                  name: fields.examples.name,
-                  index: index + 1,
-                })}
+                onClick={handleAddExample}
+                // {...form.insert.getButtonProps({
+                //   name: fields.examples.name,
+                //   index: index + 1,
+                // })}
               >
                 <PlusCircleIcon
                   className="hover:text-green-500 transition-all duration-200 cursor-pointer"
@@ -49,7 +75,8 @@ export const Examples = ({ form, fields }: ExamplesProps) => {
               </button>
               {examples.length > 1 && (
                 <button
-                  {...form.remove.getButtonProps({ name: fields.examples.name, index })}
+                  // {...form.remove.getButtonProps({ name: fields.examples.name, index })}
+                  onClick={() => handleRemoveExample(index)}
                   disabled={examples.length === 1}
                 >
                   <MinusCircleIcon

@@ -1,5 +1,11 @@
-import { Form, useActionData } from "@remix-run/react";
-import { Container } from "~/components/container";
+import {
+  Form,
+  Link,
+  redirect,
+  useActionData,
+  useFormAction,
+  useNavigation,
+} from "@remix-run/react";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
@@ -15,12 +21,19 @@ import { Origin } from "~/components/origin";
 import { saveWord } from "~/utils/save-word";
 import { Examples } from "~/components/examples";
 import { prisma } from "~/utils/db.server";
+import { CornerDownLeft } from "lucide-react";
+import { StatusButton } from "~/components/ui/status-button";
 
 export const wordSchema = z.object({
   headword: z.string({ required_error: "Требуется слово" }).min(1).max(100),
   root: z.string().min(1).max(100).optional(),
   ergative: z.string().min(1).max(100).optional(),
-  speechPart: z.enum(["существительное", "прилагательное", "глагол", "междометие", "числительное"]),
+  speechPart: z.enum(
+    ["существительное", "прилагательное", "глагол", "междометие", "числительное"],
+    {
+      required_error: "Требуется часть речи",
+    }
+  ),
   origin: z.enum(["агульский", "персидский", "арабский", "русский", "тюркский"]).optional(),
   translations: z.array(z.string({ required_error: "Требуется перевод" }).min(1)).min(1),
   examples: z
@@ -37,6 +50,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());
+
   console.log("data", data);
 
   // Report the submission to client if it is not successful
@@ -46,26 +60,37 @@ export async function action({ request }: ActionFunctionArgs) {
     return submission.reply();
   }
 
+  // throw new Error("Simulated error while saving to Prisma");
   const wordToSave = await saveWord(data);
-  // console.log("wordToSave: ", wordToSave);
-  const result = await prisma.word.create(wordToSave);
+  console.log("wordToSave:", wordToSave);
+  await prisma.word.create(wordToSave);
 
-  return result;
+  return redirect("/admin");
 }
 
 export default function AddWord() {
   type WordFormFields = z.infer<typeof wordSchema>;
   const lastResult = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const formAction = useFormAction();
+  const isSubmitting =
+    navigation.state === "submitting" &&
+    navigation.formAction === formAction &&
+    navigation.formMethod === "POST";
+
+  console.log("Navigation State:", navigation.state);
+  console.log("Is Pending:", isSubmitting);
+
   const [form, fields] = useForm<WordFormFields>({
     lastResult: lastResult as SubmissionResult,
     constraint: getZodConstraint(wordSchema),
-    shouldValidate: "onBlur",
+    shouldValidate: "onSubmit",
     defaultValue: {
-      headword: "",
-      root: "",
-      ergative: "",
+      headword: "op",
+      root: "tr",
+      ergative: "tre",
       speechPart: "",
-      translations: [""],
+      translations: ["tre"],
       examples: [
         {
           example: "",
@@ -74,11 +99,12 @@ export default function AddWord() {
       ],
     },
   });
+
   return (
-    <Container>
+    <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full my-10">
       <h1 className="mb-4 text-xl">Добавить слово</h1>
-      <Form method="POST" {...getFormProps(form)}>
-        <div className="grid grid-cols-2 gap-2 mb-6">
+      <Form method="POST" {...getFormProps(form)} className="flex-grow">
+        <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
             <fieldset>
               <Label htmlFor={fields.headword.id} className="sr-only">
@@ -113,9 +139,25 @@ export default function AddWord() {
         <h2 className="mb-2">Примеры: </h2>
         <Examples form={form} fields={fields} />
       </Form>
-      <Button form={form.id} type="submit" className="my-10">
-        Добавить
-      </Button>
-    </Container>
+      <div className=" flex justify-end gap-4  my-10 ">
+        <Link to="/admin">
+          <Button variant="outline" type="submit" className="flex gap-2">
+            <CornerDownLeft size={18} />
+            Вернуться назад
+          </Button>
+        </Link>
+
+        <StatusButton
+          form={form.id}
+          type="submit"
+          disabled={isSubmitting}
+          status={isSubmitting ? "pending" : "idle"}
+          name="intent"
+          value="add-word"
+        >
+          Добавить слово
+        </StatusButton>
+      </div>
+    </div>
   );
 }

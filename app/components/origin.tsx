@@ -21,18 +21,18 @@ interface OriginProps {
   fields: UseFormReturnType[1];
 }
 
-export function Origin({ form, fields }: OriginProps) {
+export function Origin({ fields }: OriginProps) {
   return (
     <Select
       {...getSelectProps(fields.origin)}
       key={fields.origin.key}
       defaultValue={fields.origin.initialValue}
-      onValueChange={(value) => {
-        form.update({
-          name: fields.origin.name,
-          value,
-        });
-      }}
+      // onValueChange={(value) => {
+      //   form.update({
+      //     name: fields.origin.name,
+      //     value,
+      //   });
+      // }}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Выберите происхождение" />
@@ -45,11 +45,6 @@ export function Origin({ form, fields }: OriginProps) {
               {value}
             </SelectItem>
           ))}
-          {/* <SelectItem value="существительное">Существительное</SelectItem>
-          <SelectItem value="глагол">Глагол</SelectItem>
-          <SelectItem value="прилагательное">Прилагательное</SelectItem>
-          <SelectItem value="междометие">Междометие</SelectItem>
-          <SelectItem value="числительное">Числительное</SelectItem> */}
         </SelectGroup>
       </SelectContent>
     </Select>

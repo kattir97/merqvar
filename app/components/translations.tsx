@@ -5,6 +5,7 @@ import { ErrorList } from "./error-list";
 import { useForm } from "@conform-to/react";
 import { wordSchema } from "~/routes/admin_.add-word";
 import { z } from "zod";
+import { useState } from "react";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 
@@ -15,8 +16,31 @@ interface TranslationsProps {
   fields: UseFormReturnType[1];
 }
 
-export const Translations = ({ form, fields }: TranslationsProps) => {
-  const translations = fields.translations.getFieldList();
+export const Translations = ({ fields }: TranslationsProps) => {
+  // const translations = fields.translations.getFieldList();
+  const [translations, setTranslations] = useState(fields.translations.getFieldList());
+
+  const handleAddTranslation = (event: React.MouseEvent) => {
+    event.preventDefault(); // Prevent default form submission
+
+    const baseField = fields.translations.getFieldList()[0];
+    const newTranslation = {
+      ...baseField,
+      key: `translation-${translations.length}`, // Unique key for each translation
+      name: `${fields.translations.name}[${translations.length}]`,
+      id: `${fields.translations.id}-${translations.length}`,
+      errorId: `${fields.translations.errorId}-${translations.length}`,
+      descriptionId: `${fields.translations.descriptionId}-${translations.length}`,
+      initialValue: "",
+      errors: [],
+    };
+    setTranslations([...translations, newTranslation]);
+  };
+
+  const handleRemoveTranslation = (idx: number) => {
+    setTranslations(translations.filter((_, i) => i !== idx));
+  };
+
   return (
     <div>
       <Label htmlFor={fields.translations.id} className="sr-only">
@@ -32,10 +56,12 @@ export const Translations = ({ form, fields }: TranslationsProps) => {
                 defaultValue={ts.initialValue}
               />
               <button
-                {...form.insert.getButtonProps({
-                  name: fields.translations.name,
-                  index: index + 1,
-                })}
+                type="button"
+                onClick={handleAddTranslation}
+                // {...form.insert.getButtonProps({
+                //   name: fields.translations.name,
+                //   index: index + 1,
+                // })}
               >
                 <PlusCircleIcon
                   className="hover:text-green-500 transition-all duration-200 cursor-pointer"
@@ -44,7 +70,9 @@ export const Translations = ({ form, fields }: TranslationsProps) => {
               </button>
               {translations.length > 1 && (
                 <button
-                  {...form.remove.getButtonProps({ name: fields.translations.name, index })}
+                  // {...form.remove.getButtonProps({ name: fields.translations.name, index })}
+                  type="button"
+                  onClick={() => handleRemoveTranslation(index)}
                   disabled={translations.length === 1}
                 >
                   <MinusCircleIcon

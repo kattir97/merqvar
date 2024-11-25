@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/select";
 import { SpeechPartEnum } from "~/enums/speech-part-enum";
 import { wordSchema } from "~/routes/admin_.add-word";
+import { ErrorList } from "./error-list";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 
@@ -23,30 +24,33 @@ interface SpeechPartProps {
 
 export function SpeechPart({ form, fields }: SpeechPartProps) {
   return (
-    <Select
-      {...getSelectProps(fields.speechPart)}
-      key={fields.speechPart.key}
-      defaultValue={fields.speechPart.initialValue}
-      onValueChange={(value) => {
-        form.update({
-          name: fields.speechPart.name,
-          value,
-        });
-      }}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Выберите часть речи" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Часть речи</SelectLabel>
-          {Object.values(SpeechPartEnum).map((sp) => (
-            <SelectItem value={sp} key={sp}>
-              {sp}
-            </SelectItem>
-          ))}
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <>
+      <Select
+        {...getSelectProps(fields.speechPart)}
+        key={fields.speechPart.key}
+        defaultValue={fields.speechPart.initialValue}
+        // onValueChange={(value) => {
+        //   form.update({
+        //     name: fields.speechPart.name,
+        //     value,
+        //   });
+        // }}
+      >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Выберите часть речи" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Часть речи</SelectLabel>
+            {Object.values(SpeechPartEnum).map((sp) => (
+              <SelectItem value={sp} key={sp}>
+                {sp}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <ErrorList id={form.id} errors={fields.speechPart.errors} />
+    </>
   );
 }

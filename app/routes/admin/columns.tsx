@@ -1,9 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { PencilLine, Trash2 } from "lucide-react";
 import { z } from "zod";
+import ActionButtons from "~/components/action-buttons";
 import { Badge } from "~/components/ui/badge";
 
 const AdminWordSchema = z.object({
+  id: z.string(),
   headword: z.string(),
   translations: z.array(z.object({ translation: z.string() })),
   speechPart: z.string(),
@@ -46,15 +47,10 @@ export const columns: ColumnDef<AdminWord>[] = [
   {
     id: "actions", // Unique ID for the actions column
     header: "Действия",
-    cell: () => (
-      <div className="flex gap-4">
-        <button onClick={() => {}}>
-          <PencilLine className="hover:text-green-400 transition-all duration-200" />
-        </button>
-        <button onClick={() => {}}>
-          <Trash2 className="text-red-400 hover:text-red-500 transition-all duration-200" />
-        </button>
-      </div>
-    ),
+    cell: ({ cell }) => {
+      // console.log("cell", cell);
+      const wordData = cell.row.original;
+      return <ActionButtons wordData={wordData} />;
+    },
   },
 ];

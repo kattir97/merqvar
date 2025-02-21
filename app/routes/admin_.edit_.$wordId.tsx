@@ -1,16 +1,18 @@
 import {
   Form,
+  json,
   Link,
   redirect,
   useActionData,
   useFormAction,
+  useLoaderData,
   useNavigation,
 } from "@remix-run/react";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { z } from "zod";
-import { ActionFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
 // import { MinusCircleIcon, PlusCircleIcon } from "lucide-react";
@@ -25,10 +27,44 @@ import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function loader({ params }: LoaderFunctionArgs) {
+  console.log("params", params);
+  const { wordId } = params;
+  console.log("wordId:", wordId);
+
+  if (!wordId) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  const data = await prisma.word.findUnique({
+    where: { id: wordId },
+    select: {
+      id: true,
+      headword: true,
+      ergative: true,
+      speechPart: true,
+      origin: true,
+      root: true,
+      tags: true,
+      createdAt: true,
+      examples: true,
+      translations: {
+        select: { translation: true },
+      },
+    },
+  });
+
+  console.log(data);
+  return json(data);
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { wordId } = params;
+
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());
+
+  console.log("data", data);
 
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
@@ -38,15 +74,23 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   // throw new Error("Simulated error while saving to Prisma");
-  const wordToSave = await saveWord(data);
-  await prisma.word.create(wordToSave);
+  const { data: wordData } = await saveWord(data);
+  console.log("wordToSave:", wordData);
+  await prisma.word.update({
+    where: {
+      id: wordId,
+    },
+    data: wordData,
+  });
 
   return redirect("/admin");
 }
 
-export default function AddWord() {
+export default function EditWord() {
   type WordFormFields = z.infer<typeof wordSchema>;
   const lastResult = useActionData<typeof action>();
+  const loaderData = useLoaderData<typeof loader>();
+  const trs = loaderData?.translations.map((tr) => tr.translation) ?? [];
   const navigation = useNavigation();
   const formAction = useFormAction();
   const isSubmitting =
@@ -54,28 +98,31 @@ export default function AddWord() {
     navigation.formAction === formAction &&
     navigation.formMethod === "POST";
 
+  console.log("Navigation State:", navigation.state);
+  console.log("Is Pending:", isSubmitting);
+
   const [form, fields] = useForm<WordFormFields>({
     lastResult: lastResult as SubmissionResult,
     constraint: getZodConstraint(wordSchema),
     shouldValidate: "onSubmit",
     defaultValue: {
-      headword: "",
-      root: "",
-      ergative: "",
-      speechPart: "",
-      translations: [""],
-      examples: [
-        {
-          example: "",
-          translation: "",
-        },
-      ],
+      headword: loaderData?.headword,
+      root: loaderData?.root,
+      ergative: loaderData?.ergative,
+      speechPart: loaderData?.speechPart,
+      translations: [...trs],
+      examples: loaderData?.examples.map((ex) => {
+        return {
+          example: ex.example,
+          translation: ex.translation,
+        };
+      }),
     },
   });
 
   return (
     <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full my-10">
-      <h1 className="mb-4 text-xl">Добавить слово</h1>
+      <h1 className="mb-4 text-xl">Изменить слово</h1>
       <Form method="POST" {...getFormProps(form)} className="flex-grow">
         <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
@@ -128,7 +175,7 @@ export default function AddWord() {
           name="intent"
           value="add-word"
         >
-          Добавить слово
+          Изменить слово
         </StatusButton>
       </div>
     </div>

@@ -93,7 +93,7 @@ async function main() {
 
 
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 2; i++) {
     if (i % 2 === 0) {
       await prisma.word.create({
         data: words[0]

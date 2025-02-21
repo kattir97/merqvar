@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { SpeechPartEnum } from "~/enums/speech-part-enum";
-import { wordSchema } from "~/routes/admin_.add-word";
 import { ErrorList } from "./error-list";
+import { wordSchema } from "~/types/word-schema";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 

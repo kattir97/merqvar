@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -11,43 +9,71 @@ datasource db {
 }
 
 model Word {
-  id           String        @id @default(cuid())
-  headword     String
-  audio        String?
-  root         String?
-  ergative     String?
-  speechPart   String
-  origin       String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  translations Translation[]
-  examples     Example[]
-  tags         Tag[]
+  id                       String                   @id @default(cuid())
+  headword                 String
+  root                     String?
+  ergative                 String?
+  speechPart               String
+  origin                   String?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  audio                    String?
+  textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector('simple'::regconfig, ((COALESCE(headword, ''::text) || ' '::text) || COALESCE(root, ''::text)))"))
+  examples                 Example[]
+  translations             Translation[]
+  tags                     Tag[]                    @relation("TagToWord")
+
+  @@index([textsearchable_index_col], map: "idx_word_textsearch", type: Gin)
 }
 
 model Translation {
-  id          String   @id @default(cuid())
-  translation String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  word        Word     @relation(fields: [wordId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  wordId      String
+  id                       String                   @id @default(cuid())
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  wordId                   String
+  translation              String
+  textsearchable_index_col Unsupported("tsvector")? @default(dbgenerated("to_tsvector('russian'::regconfig, COALESCE(translation, ''::text))"))
+  word                     Word                     @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@index([textsearchable_index_col], map: "idx_translation_textsearch", type: Gin)
 }
 
 model Example {
   id          String   @id @default(cuid())
   example     String
   translation String
-  word        Word     @relation(fields: [wordId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   wordId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  word        Word     @relation(fields: [wordId], references: [id], onDelete: Cascade)
 }
 
 model Tag {
   id        String   @id @default(cuid())
   name      String   @unique
-  words     Word[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  words     Word[]   @relation("TagToWord")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  username  String    @unique
+  name      String?
+  password  Password?
+  role      UserRole  @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Password {
+  hash   String // Store the hashed password here
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+enum UserRole {
+  ADMIN
+  USER
 }

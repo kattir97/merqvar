@@ -2,7 +2,7 @@ import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useFormAction, useNavigation } from "@remix-run/react";
-import { isValid, z } from "zod";
+import { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";

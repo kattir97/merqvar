@@ -6,6 +6,8 @@ import { TopNavbar } from "./components/top-navbar";
 import { getEnv } from "./utils/env.server";
 import { getTheme } from "./utils/theme.server";
 import { Toaster } from "sonner";
+import { sessionStorage } from "./utils/session.server";
+import { prisma } from "./utils/db.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -39,7 +41,25 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
+  const userId = cookieSession.get("userId");
+
+  const user = userId
+    ? await prisma.user.findUnique({
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          role: true,
+        },
+        where: { id: userId },
+      })
+    : null;
+
+  console.log("USER", user);
+
   return json({
+    user: user,
     theme: getTheme(request),
     ENV: getEnv(),
   });
@@ -70,7 +90,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-[100vh]">
         <Toaster />
-        <TopNavbar theme={theme} />
+        <TopNavbar theme={theme} user={data.user} />
         {children}
         {/* <ScrollRestoration /> */}
         <Scripts />

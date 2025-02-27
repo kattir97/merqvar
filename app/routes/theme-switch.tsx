@@ -1,6 +1,6 @@
 import { getFormProps, SubmissionResult, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, data } from "@remix-run/node";
 import { json, useFetcher } from "@remix-run/react";
 import { Moon, Sun } from "lucide-react";
 import { z } from "zod";
@@ -21,8 +21,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
-    console.log("Submission failed:", submission.error);
-    console.log(true);
     return submission.reply();
   }
 
@@ -32,7 +30,7 @@ export async function action({ request }: ActionFunctionArgs) {
     },
   };
 
-  return json({ success: true, submission }, responseInit);
+  return data({ success: true, submission }, responseInit);
 }
 
 export function ThemeSwitch({ userPreference }: { userPreference?: Theme }) {

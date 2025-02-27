@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, data, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useFormAction, useNavigation } from "@remix-run/react";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
@@ -21,8 +21,7 @@ const registerSchema = z.object({
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const data = Object.fromEntries(formData.entries());
-  console.log("formData", data);
+  // const data = Object.fromEntries(formData.entries());
 
   const submission = await parseWithZod(formData, {
     schema: registerSchema
@@ -66,8 +65,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If validation fails, return an error response
   if (submission.status !== "success") {
-    console.log("Submission result:", submission);
-    return json({ status: "error", submission }, { status: 400 });
+    return data(
+      { status: "error", submission },
+      {
+        status: 400,
+      }
+    );
   }
 
   // Handle non-submit intents (e.g., validation-only requests)
@@ -77,7 +80,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If validation fails, return an error response
   if (!submission.value?.user) {
-    return json({ status: "error", submission }, { status: 400 });
+    return data(
+      { status: "error", submission },
+      {
+        status: 400,
+      }
+    );
   }
 
   // If everything is successful, set the userId in the session cookie

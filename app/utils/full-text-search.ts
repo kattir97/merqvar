@@ -14,7 +14,6 @@ export async function fullTextSearch(query: string) {
 
   const ids = wordIds.map((obj) => obj.id);
 
-  console.log('wordIDS', ids)
 
   if (!wordIds.length) return [];
 

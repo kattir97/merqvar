@@ -1,4 +1,6 @@
-export async function saveWord(formData: { [k: string]: FormDataEntryValue }) {
+import { prisma } from "./db.server";
+
+export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wordId?: string) {
   const { headword, root, ergative, speechPart, origin } = formData;
 
 
@@ -32,22 +34,64 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }) {
 
 
 
-
-  // Return the data in the expected format for Prisma
-  return {
-    data: {
-      headword: headword as string,
-      root: root as string,
-      ergative: ergative as string,
-      speechPart: speechPart as string,
-      origin: origin as string,
-      translations: {
-        create: translations
-      },
-      examples: {
-        create: examples
-      }
-    }
+  const wordData = {
+    headword: headword as string,
+    root: root as string,
+    ergative: ergative as string,
+    speechPart: speechPart as string,
+    origin: origin as string,
+    translations: {
+      create: translations,
+    },
+    examples: {
+      create: examples,
+    },
   };
+
+  if (wordId) {
+    // Update existing word
+    await prisma.word.update({
+      where: { id: wordId },
+      data: {
+        ...wordData,
+        translations: {
+          deleteMany: {}, // Delete existing translations
+          create: translations,
+        },
+        examples: {
+          deleteMany: {}, // Delete existing examples
+          create: examples,
+        },
+      },
+    });
+  } else {
+    // Create new word
+    await prisma.word.create({
+      data: wordData,
+    });
+  }
+
+  return { data: wordData };
+
+
+
+  // // Return the data in the expected format for Prisma
+  // return {
+  //   data: {
+  //     headword: headword as string,
+  //     root: root as string,
+  //     ergative: ergative as string,
+  //     speechPart: speechPart as string,
+  //     origin: origin as string,
+  //     translations: {
+  //       deleteMany: {}, // Delete existing translations
+  //       create: translations,
+  //     },
+  //     examples: {
+  //       deleteMany: {}, // Delete existing examples
+  //       create: examples,
+  //     },
+  //   }
+  // };
 }
 

@@ -1,6 +1,6 @@
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, data, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useFormAction, useNavigation } from "@remix-run/react";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
@@ -13,16 +13,21 @@ import { EmailSchema, PasswordSchema } from "~/utils/user-validation";
 import { sessionStorage } from "~/utils/session.server";
 import bcrypt from "bcryptjs";
 import { useState } from "react";
+import { Checkbox } from "~/components/ui/checkbox";
 
 const loginSchema = z.object({
   email: EmailSchema,
   password: PasswordSchema,
+  remember: z.preprocess(
+    // Transform "on" to true, and undefined to false
+    (val) => val === "on",
+    z.boolean().optional().default(false)
+  ),
 });
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const data = Object.fromEntries(formData.entries());
-  console.log("formData", data);
+  // const data = Object.fromEntries(formData.entries());
 
   const submission = await parseWithZod(formData, {
     schema: loginSchema.transform(async (data, ctx) => {
@@ -60,13 +65,16 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 
   // get the password off the payload that's sent back
-  console.log("password", submission.payload.password);
   delete submission.payload.password;
 
   // If validation fails, return an error response
   if (submission.status !== "success") {
-    console.log("Submission result:", submission);
-    return json({ status: "error", submission }, { status: 400 });
+    return data(
+      { status: "error", submission },
+      {
+        status: 400,
+      }
+    );
   }
 
   // Handle non-submit intents (e.g., validation-only requests)
@@ -76,18 +84,25 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If validation fails, return an error response
   if (!submission.value?.user) {
-    return json({ status: "error", submission }, { status: 400 });
+    return data(
+      { status: "error", submission },
+      {
+        status: 400,
+      }
+    );
   }
 
   // If everything is successful, set the userId in the session cookie
-  const { user } = submission.value;
+  const { user, remember } = submission.value;
   const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
   cookieSession.set("userId", user.id);
 
   // Redirect to the admin page with the updated session cookie
   return redirect("/admin", {
     headers: {
-      "Set-Cookie": await sessionStorage.commitSession(cookieSession),
+      "set-cookie": await sessionStorage.commitSession(cookieSession, {
+        expires: remember ? new Date(Date.now() + 30 * 24 * 60 * 100) : undefined,
+      }),
     },
   });
 }
@@ -145,12 +160,7 @@ export default function LoginPage() {
             <ErrorList id={fields.email.errorId} errors={emailError} />
           </div>
           <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor={fields.password.id}>Password</Label>
-              <Link to="#" className="ml-auto text-sm underline-offset-4 hover:underline">
-                Forgot your password?
-              </Link>
-            </div>
+            <Label htmlFor={fields.password.id}>Password</Label>
             <Input
               {...getInputProps(fields.password, { type: "password" })}
               id="password"
@@ -160,6 +170,15 @@ export default function LoginPage() {
               required
             />
             <ErrorList id={fields.password.errorId} errors={passwordError} />
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex gap-2">
+              <Checkbox id={fields.remember.id} name={fields.remember.name} />
+              <label htmlFor={fields.remember.id}>Remember me</label>
+            </div>
+            <Link to="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+              Forgot your password?
+            </Link>
           </div>
           <ErrorList id={form.errorId} errors={globalError} />
           <StatusButton status={isSubmitting ? "pending" : "idle"} type="submit" className="w-full">

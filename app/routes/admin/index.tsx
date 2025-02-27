@@ -3,7 +3,7 @@ import { Container } from "~/components/container";
 import { prisma } from "~/utils/db.server";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { data, LoaderFunctionArgs } from "@remix-run/node";
 import { Prisma } from "@prisma/client";
 import { toastSessionStorage } from "~/utils/toast.server";
 import { toast as showToast } from "sonner";
@@ -15,7 +15,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const toastCookieSession = await toastSessionStorage.getSession(cookie);
   const toast = toastCookieSession.get("toast");
   // toastCookieSession.unset("toast");
-  console.log("toast", toast);
 
   const url = new URL(request.url);
   const page = Number(url.searchParams.get("page") || 1);
@@ -82,7 +81,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }),
   ]);
 
-  return json(
+  return data(
     { words, totalWords, page, pageSize, sortBy, order, filter, toast },
     {
       headers: {

@@ -13,14 +13,12 @@ import { z } from "zod";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
-// import { MinusCircleIcon, PlusCircleIcon } from "lucide-react";
 import { Translations } from "~/components/translations";
 import { SpeechPart } from "~/components/speech-part";
 import { Button } from "~/components/ui/button";
 import { Origin } from "~/components/origin";
 import { saveWord } from "~/utils/save-word";
 import { Examples } from "~/components/examples";
-import { prisma } from "~/utils/db.server";
 import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
@@ -32,14 +30,11 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
-    console.log("Submission failed:", submission.error);
-    console.log(true);
     return submission.reply();
   }
 
   // throw new Error("Simulated error while saving to Prisma");
-  const wordToSave = await saveWord(data);
-  await prisma.word.create(wordToSave);
+  await saveWord(data);
 
   return redirect("/admin");
 }

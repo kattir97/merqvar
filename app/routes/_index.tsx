@@ -1,4 +1,4 @@
-import { json, LoaderFunction, type MetaFunction } from "@remix-run/node";
+import { LoaderFunction, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { Container } from "~/components/container";
@@ -18,7 +18,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   const query = url.searchParams.get("query");
 
   if (!query) {
-    return json([]);
+    return [];
   }
 
   const results = await fullTextSearch(query);

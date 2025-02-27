@@ -1,6 +1,5 @@
 import {
   Form,
-  json,
   Link,
   redirect,
   useActionData,
@@ -28,9 +27,7 @@ import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
 
 export async function loader({ params }: LoaderFunctionArgs) {
-  console.log("params", params);
   const { wordId } = params;
-  console.log("wordId:", wordId);
 
   if (!wordId) {
     throw new Response("Not Found", { status: 404 });
@@ -53,8 +50,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     },
   });
 
-  console.log(data);
-  return json(data);
+  return data;
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -64,24 +60,20 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());
 
-  console.log("data", data);
-
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
-    console.log("Submission failed:", submission.error);
-    console.log(true);
     return submission.reply();
   }
 
   // throw new Error("Simulated error while saving to Prisma");
-  const { data: wordData } = await saveWord(data);
+  const { data: wordData } = await saveWord(data, wordId);
   console.log("wordToSave:", wordData);
-  await prisma.word.update({
-    where: {
-      id: wordId,
-    },
-    data: wordData,
-  });
+  // await prisma.word.update({
+  //   where: {
+  //     id: wordId,
+  //   },
+  //   data: wordData,
+  // });
 
   return redirect("/admin");
 }
@@ -97,9 +89,6 @@ export default function EditWord() {
     navigation.state === "submitting" &&
     navigation.formAction === formAction &&
     navigation.formMethod === "POST";
-
-  console.log("Navigation State:", navigation.state);
-  console.log("Is Pending:", isSubmitting);
 
   const [form, fields] = useForm<WordFormFields>({
     lastResult: lastResult as SubmissionResult,

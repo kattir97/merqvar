@@ -1,4 +1,12 @@
-import { json, Links, Meta, Outlet, Scripts, useFetchers, useLoaderData } from "@remix-run/react";
+import {
+  Links,
+  Meta,
+  Outlet,
+  redirect,
+  Scripts,
+  useFetchers,
+  useLoaderData,
+} from "@remix-run/react";
 import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
@@ -56,13 +64,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
       })
     : null;
 
-  console.log("USER", user);
+  if (userId && !user) {
+    throw redirect("/", {
+      headers: {
+        "set-cookie": await sessionStorage.destroySession(cookieSession),
+      },
+    });
+  }
 
-  return json({
+  return {
     user: user,
     theme: getTheme(request),
     ENV: getEnv(),
-  });
+  };
 }
 
 function useTheme() {
@@ -90,7 +104,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-[100vh]">
         <Toaster />
-        <TopNavbar theme={theme} user={data.user} />
+        <TopNavbar theme={theme} />
         {children}
         {/* <ScrollRestoration /> */}
         <Scripts />

@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link } from "react-router";
 import { ThemeSwitch } from "../routes/theme-switch";
 import { Theme } from "~/types/theme";
 import { useOptionalUser } from "~/utils/user";

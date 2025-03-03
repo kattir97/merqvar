@@ -6,12 +6,13 @@ import {
   useFormAction,
   useLoaderData,
   useNavigation,
-} from "@remix-run/react";
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "react-router";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { z } from "zod";
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
 // import { MinusCircleIcon, PlusCircleIcon } from "lucide-react";
@@ -25,8 +26,10 @@ import { prisma } from "~/utils/db.server";
 import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
+import { requireAdmin } from "~/utils/auth.server";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  await requireAdmin(request);
   const { wordId } = params;
 
   if (!wordId) {
@@ -54,6 +57,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
+  await requireAdmin(request);
   const { wordId } = params;
 
   const formData = await request.formData();
@@ -68,12 +72,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // throw new Error("Simulated error while saving to Prisma");
   const { data: wordData } = await saveWord(data, wordId);
   console.log("wordToSave:", wordData);
-  // await prisma.word.update({
-  //   where: {
-  //     id: wordId,
-  //   },
-  //   data: wordData,
-  // });
 
   return redirect("/admin");
 }
@@ -99,6 +97,7 @@ export default function EditWord() {
       root: loaderData?.root,
       ergative: loaderData?.ergative,
       speechPart: loaderData?.speechPart,
+      origin: loaderData?.origin,
       translations: [...trs],
       examples: loaderData?.examples.map((ex) => {
         return {

@@ -1,13 +1,5 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  redirect,
-  Scripts,
-  useFetchers,
-  useLoaderData,
-} from "@remix-run/react";
-import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { Links, Meta, Outlet, redirect, Scripts, useFetchers, useLoaderData } from "react-router";
+import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
 
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
 import { TopNavbar } from "./components/top-navbar";

@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Form, useSearchParams } from "@remix-run/react";
+import { Form, useSearchParams } from "react-router";
 
 type SearchBarProps = {
   height?: "h-8" | "h-9" | "h-10" | "h-11" | "h-12";

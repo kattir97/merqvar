@@ -1,7 +1,16 @@
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs, data, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useFormAction, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useActionData,
+  useFormAction,
+  useNavigation,
+  ActionFunctionArgs,
+  data,
+  redirect,
+  LoaderFunctionArgs,
+} from "react-router";
 import { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -12,6 +21,7 @@ import { ErrorList } from "~/components/error-list";
 import { EmailSchema, PasswordSchema, UsernameSchema } from "~/utils/user-validation";
 import bcrypt from "bcryptjs";
 import { sessionStorage } from "~/utils/session.server";
+import { requireAnonymous } from "~/utils/auth.server";
 
 const registerSchema = z.object({
   email: EmailSchema,
@@ -19,7 +29,13 @@ const registerSchema = z.object({
   username: UsernameSchema,
 });
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAnonymous(request);
+  return {};
+}
+
 export async function action({ request }: ActionFunctionArgs) {
+  await requireAnonymous(request);
   const formData = await request.formData();
   // const data = Object.fromEntries(formData.entries());
 
@@ -120,14 +136,30 @@ export default function RegisterPage() {
     shouldRevalidate: "onBlur",
   });
 
+  type SubmissionError = {
+    email?: string[];
+    password?: string[];
+    username?: string[];
+    global?: string[];
+  };
+
   const emailError =
-    lastResult?.submission.status === "error" ? lastResult.submission.error?.email : [];
+    lastResult?.submission.status === "error"
+      ? (lastResult.submission.error as SubmissionError)?.email
+      : [];
   const passwordError =
-    lastResult?.submission.status === "error" ? lastResult.submission.error?.password : [];
+    lastResult?.submission.status === "error"
+      ? (lastResult.submission.error as SubmissionError)?.password
+      : [];
+
   const usernameError =
-    lastResult?.submission.status === "error" ? lastResult.submission.error?.username : [];
+    lastResult?.submission.status === "error"
+      ? (lastResult.submission.error as SubmissionError)?.username
+      : [];
   const globalError =
-    lastResult?.submission.status === "error" ? lastResult.submission.error?.global : [];
+    lastResult?.submission.status === "error"
+      ? (lastResult.submission.error as SubmissionError)?.global
+      : [];
 
   return (
     <div className="flex justify-center items-center p-10">

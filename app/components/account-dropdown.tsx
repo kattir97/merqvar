@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"; //
 import { ChevronDown, LogOut, Settings, User } from "lucide-react"; // Icons (e.g., from lucide-react)
 import { cn } from "~/lib/utils"; // Utility for className concatenation (common in ShadCN)
 import { useOptionalUser } from "~/utils/user";
-import { Form, Link } from "@remix-run/react";
+import { Form, Link } from "react-router";
 
 const AccountDropdown: React.FC = () => {
   const user = useOptionalUser();

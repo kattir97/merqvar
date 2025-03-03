@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Pagination } from "./pagination";
-import { useNavigation, useNavigate, Form, NavLink } from "@remix-run/react";
+import { useNavigation, useNavigate, Form, NavLink } from "react-router";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useState } from "react";

@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-import { Form, Link } from "@remix-run/react";
+import { Form, Link } from "react-router";
 import { Button } from "./ui/button";
 import { WordColumnType } from "~/types/types";
 

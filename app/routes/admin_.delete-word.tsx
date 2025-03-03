@@ -1,8 +1,10 @@
 import { prisma } from "~/utils/db.server";
-import { ActionFunction, redirect } from "@remix-run/node";
+import { ActionFunction, redirect } from "react-router";
 import { toastSessionStorage } from "~/utils/toast.server";
+import { requireAdmin } from "~/utils/auth.server";
 
 export const action: ActionFunction = async ({ request }) => {
+  await requireAdmin(request);
   const formData = await request.formData();
   const wordId = formData.get("wordId");
   const headword = formData.get("headword");

@@ -1,15 +1,19 @@
-import { json, useLoaderData } from "@remix-run/react";
+import { useLoaderData, data, LoaderFunctionArgs } from "react-router";
 import { Container } from "~/components/container";
 import { prisma } from "~/utils/db.server";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
-import { data, LoaderFunctionArgs } from "@remix-run/node";
 import { Prisma } from "@prisma/client";
 import { toastSessionStorage } from "~/utils/toast.server";
 import { toast as showToast } from "sonner";
 import { useEffect, useState } from "react";
+import { requireUserId } from "~/utils/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  // route protection
+  const userId = await requireUserId(request);
+  console.log("REQUIREUSERID", userId);
+
   // cookie
   const cookie = request.headers.get("cookie");
   const toastCookieSession = await toastSessionStorage.getSession(cookie);

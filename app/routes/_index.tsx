@@ -1,5 +1,5 @@
-import { LoaderFunction, type MetaFunction } from "@remix-run/node";
-import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
+import { LoaderFunction, type MetaFunction } from "react-router";
+import { useLoaderData, useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { Container } from "~/components/container";
 import { SearchBar } from "~/components/search-bar";

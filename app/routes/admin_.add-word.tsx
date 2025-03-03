@@ -5,12 +5,13 @@ import {
   useActionData,
   useFormAction,
   useNavigation,
-} from "@remix-run/react";
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "react-router";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
 import { z } from "zod";
-import { ActionFunctionArgs } from "@remix-run/node";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
 import { Translations } from "~/components/translations";
@@ -22,8 +23,15 @@ import { Examples } from "~/components/examples";
 import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
+import { requireAdmin } from "~/utils/auth.server";
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAdmin(request);
+  return null;
+}
 
 export async function action({ request }: ActionFunctionArgs) {
+  await requireAdmin(request);
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());

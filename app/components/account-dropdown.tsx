@@ -10,6 +10,7 @@ import { Form, Link } from "react-router";
 const AccountDropdown: React.FC = () => {
   const user = useOptionalUser();
   const displayName = user?.name ?? user?.username;
+  const isAdmin = user?.roles.some((role) => role.name === "admin");
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -39,7 +40,7 @@ const AccountDropdown: React.FC = () => {
           )}
           sideOffset={8}
         >
-          {user?.role === "ADMIN" ? (
+          {isAdmin ? (
             <Link to="/admin">
               <DropdownMenu.Item
                 className={cn(

@@ -56,24 +56,64 @@ model Tag {
   words     Word[]   @relation("TagToWord")
 }
 
+model Password {
+  hash   String
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
-  username  String    @unique
-  name      String?
-  password  Password?
-  role      UserRole  @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  name      String?
+  username  String    @unique
+  password  Password?
+  roles     Role[]    @relation("RoleToUser")
 }
 
-model Password {
-  hash   String // Store the hashed password here
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+model Permission {
+  id          String            @id @default(cuid())
+  description String?           @default("")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  action      PermissionActions
+  entity      EntityName
+  access      AccessName
+  roles       Role[]            @relation("PermissionToRole")
+
+  @@unique([action, entity, access])
 }
 
-enum UserRole {
-  ADMIN
-  USER
+model Role {
+  id          String       @id @default(cuid())
+  description String?      @default("")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  name        RoleName     @unique
+  permissions Permission[] @relation("PermissionToRole")
+  users       User[]       @relation("RoleToUser")
+}
+
+enum RoleName {
+  admin
+  user
+}
+
+enum PermissionActions {
+  create
+  read
+  update
+  delete
+}
+
+enum EntityName {
+  user
+  word
+}
+
+enum AccessName {
+  own
+  any
 }

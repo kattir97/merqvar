@@ -6,7 +6,49 @@ async function main() {
   console.log('🌱 Seeding...')
   console.time('🧹 Cleaned up the database...')
   await prisma.word.deleteMany()
+  await prisma.user.deleteMany();
+  await prisma.role.deleteMany()
+  await prisma.permission.deleteMany()
   console.timeEnd('🧹 Cleaned up the database...')
+
+  const entities = ["word"] as const;
+  const actions = ["create", "read", "update", "delete"] as const;
+  const accesses = ["own", "any"] as const;
+
+  for (const entity of entities) {
+    for (const action of actions) {
+      for (const access of accesses) {
+
+        await prisma.permission.create({
+          data: {
+            entity, action, access
+          }
+        })
+      }
+    }
+  }
+
+  await prisma.role.create({
+    data: {
+      name: "user",
+      permissions: {
+        connect: await prisma.permission.findMany({
+          where: { access: "own" }
+        })
+      }
+    }
+  })
+
+  await prisma.role.create({
+    data: {
+      name: "admin",
+      permissions: {
+        connect: await prisma.permission.findMany({
+          where: { access: "any" }
+        })
+      }
+    }
+  })
 
   // Create some tags
   const tag1 = await prisma.tag.upsert({

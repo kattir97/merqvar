@@ -64,6 +64,7 @@ export async function action({ request }: ActionFunctionArgs) {
           data: {
             email: email.toLowerCase(),
             username: username.toLowerCase(),
+            roles: { connect: { name: "user" } },
             password: {
               create: {
                 hash: await bcrypt.hash(password, 10),

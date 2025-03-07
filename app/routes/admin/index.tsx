@@ -7,12 +7,11 @@ import { Prisma } from "@prisma/client";
 import { toastSessionStorage } from "~/utils/toast.server";
 import { toast as showToast } from "sonner";
 import { useEffect, useState } from "react";
-import { requireAdmin } from "~/utils/auth.server";
+import { requireUserWithRole } from "~/utils/permissions";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   // route protection
-  const userId = await requireAdmin(request);
-  console.log("REQUIREUSERID", userId);
+  await requireUserWithRole(request, ["admin", "moderator"]);
 
   // cookie
   const cookie = request.headers.get("cookie");

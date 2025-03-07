@@ -23,15 +23,15 @@ import { Examples } from "~/components/examples";
 import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
-import { requireAdmin } from "~/utils/auth.server";
+import { requireUserWithRole } from "~/utils/permissions";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await requireAdmin(request);
+  await requireUserWithRole(request, ["admin", "moderator"]);
   return null;
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  await requireAdmin(request);
+  await requireUserWithRole(request, ["admin", "moderator"]);
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());

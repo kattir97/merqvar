@@ -26,10 +26,11 @@ import { prisma } from "~/utils/db.server";
 import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
-import { requireAdmin } from "~/utils/auth.server";
+import { requireUserWithRole } from "~/utils/permissions";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-  await requireAdmin(request);
+  await requireUserWithRole(request, ["admin", "moderator"]);
+
   const { wordId } = params;
 
   if (!wordId) {
@@ -57,7 +58,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  await requireAdmin(request);
+  await requireUserWithRole(request, ["admin", "moderator"]);
   const { wordId } = params;
 
   const formData = await request.formData();

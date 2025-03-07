@@ -33,7 +33,18 @@ async function main() {
       name: "user",
       permissions: {
         connect: await prisma.permission.findMany({
-          where: { access: "own" }
+          where: { access: "own", action: "create", entity: "word" }
+        })
+      }
+    }
+  })
+
+  await prisma.role.create({
+    data: {
+      name: "moderator",
+      permissions: {
+        connect: await prisma.permission.findMany({
+          where: { access: "own", action: { in: ["create", "read", "update"] }, entity: "word" }
         })
       }
     }

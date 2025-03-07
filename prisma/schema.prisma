@@ -99,6 +99,7 @@ model Role {
 enum RoleName {
   admin
   user
+  moderator
 }
 
 enum PermissionActions {

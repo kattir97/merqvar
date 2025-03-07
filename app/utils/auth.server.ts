@@ -80,7 +80,7 @@ export async function requireAnonymous(request: Request) {
 }
 
 
-export async function requireAdmin(request: Request) {
+export async function requireAdminOrModer(request: Request) {
   const userId = await requireUserId(request)
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -91,7 +91,7 @@ export async function requireAdmin(request: Request) {
     }
   })
 
-  const isAdmin = user?.roles.some((role) => role.name === "admin");
+  const isAdmin = user?.roles.some((role) => role.name === "admin" || role.name === 'moderator');
 
   if (!isAdmin) {
     throw redirect('/');

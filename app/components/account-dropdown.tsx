@@ -10,7 +10,7 @@ import { Form, Link } from "react-router";
 const AccountDropdown: React.FC = () => {
   const user = useOptionalUser();
   const displayName = user?.name ?? user?.username;
-  const isAdmin = user?.roles.some((role) => role.name === "admin");
+  const isAdmin = user?.roles.some((role) => role.name === "admin" || role.name === "moderator");
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>

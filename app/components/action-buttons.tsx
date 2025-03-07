@@ -14,9 +14,16 @@ import {
 import { Form, Link } from "react-router";
 import { Button } from "./ui/button";
 import { WordColumnType } from "~/types/types";
+import { useUser } from "~/utils/user";
 
 const ActionButtons = ({ wordData }: { wordData: WordColumnType }) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
+
+  const user = useUser();
+  const canDelete = user.roles.some((role) =>
+    role.permissions.some((per) => per.action === "delete")
+  );
+  // const canDelete = true;
 
   return (
     <div className="flex gap-4">
@@ -25,9 +32,11 @@ const ActionButtons = ({ wordData }: { wordData: WordColumnType }) => {
           <PencilLine className="hover:text-green-400 transition-all duration-200" />
         </Link>
       </button>
-      <button onClick={() => setDialogOpen(true)}>
-        <Trash2 className="text-red-400 hover:text-red-500 transition-all duration-200" />
-      </button>
+      {canDelete ? (
+        <button onClick={() => setDialogOpen(true)}>
+          <Trash2 className="text-red-400 hover:text-red-500 transition-all duration-200" />
+        </button>
+      ) : null}
 
       <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogContent>

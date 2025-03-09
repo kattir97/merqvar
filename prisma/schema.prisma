@@ -62,6 +62,18 @@ model Password {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Session {
+  id             String   @id @default(cuid())
+  expirationDate DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -71,6 +83,7 @@ model User {
   username  String    @unique
   password  Password?
   roles     Role[]    @relation("RoleToUser")
+  sessions  Session[]
 }
 
 model Permission {

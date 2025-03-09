@@ -8,6 +8,7 @@ import { getTheme } from "./utils/theme.server";
 import { Toaster } from "sonner";
 import { sessionStorage } from "./utils/session.server";
 import { prisma } from "./utils/db.server";
+import { getUserId, sessionKey } from "./utils/auth.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -41,8 +42,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
-  const userId = cookieSession.get("userId");
+  const userId = await getUserId(request);
 
   const user = userId
     ? await prisma.user.findUnique({

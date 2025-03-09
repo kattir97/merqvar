@@ -19,9 +19,8 @@ import { cn } from "~/lib/utils";
 import { prisma } from "../utils/db.server";
 import { ErrorList } from "~/components/error-list";
 import { EmailSchema, PasswordSchema, UsernameSchema } from "~/utils/user-validation";
-import bcrypt from "bcryptjs";
 import { sessionStorage } from "~/utils/session.server";
-import { requireAnonymous } from "~/utils/auth.server";
+import { requireAnonymous, sessionKey, signup } from "~/utils/auth.server";
 
 const registerSchema = z.object({
   email: EmailSchema,
@@ -59,21 +58,23 @@ export async function action({ request }: ActionFunctionArgs) {
       .transform(async (data) => {
         const { email, password, username } = data;
 
-        const user = await prisma.user.create({
-          select: { id: true },
-          data: {
-            email: email.toLowerCase(),
-            username: username.toLowerCase(),
-            roles: { connect: { name: "user" } },
-            password: {
-              create: {
-                hash: await bcrypt.hash(password, 10),
-              },
-            },
-          },
-        });
+        // const user = await prisma.user.create({
+        //   select: { id: true },
+        //   data: {
+        //     email: email.toLowerCase(),
+        //     username: username.toLowerCase(),
+        //     roles: { connect: { name: "user" } },
+        //     password: {
+        //       create: {
+        //         hash: await bcrypt.hash(password, 10),
+        //       },
+        //     },
+        //   },
+        // });
 
-        return { ...data, user };
+        const session = await signup({ email, username, password });
+
+        return { ...data, session };
       }),
     async: true,
   });
@@ -96,7 +97,7 @@ export async function action({ request }: ActionFunctionArgs) {
   // }
 
   // If validation fails, return an error response
-  if (!submission.value?.user) {
+  if (!submission.value?.session) {
     return data(
       { status: "error", submission },
       {
@@ -106,14 +107,15 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   // If everything is successful, set the userId in the session cookie
-  const { user } = submission.value;
+  const { session } = submission.value;
   const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
-  cookieSession.set("userId", user.id);
+  cookieSession.set(sessionKey, session.id);
 
   // Redirect to the admin page with the updated session cookie
+  // TODO: add remeber button and expiration date to code
   return redirect("/admin", {
     headers: {
-      "Set-Cookie": await sessionStorage.commitSession(cookieSession),
+      "set-Cookie": await sessionStorage.commitSession(cookieSession),
     },
   });
 }

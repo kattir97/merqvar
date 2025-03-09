@@ -2,7 +2,6 @@ import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
   ActionFunctionArgs,
-  data,
   LoaderFunctionArgs,
   redirect,
   Form,
@@ -16,14 +15,12 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";
 import { cn } from "~/lib/utils";
-import { prisma } from "../utils/db.server";
 import { ErrorList } from "~/components/error-list";
 import { EmailSchema, PasswordSchema } from "~/utils/user-validation";
 import { sessionStorage } from "~/utils/session.server";
-import bcrypt from "bcryptjs";
 import { useState } from "react";
 import { Checkbox } from "~/components/ui/checkbox";
-import { requireAnonymous } from "~/utils/auth.server";
+import { login, requireAnonymous, sessionKey } from "~/utils/auth.server";
 
 const loginSchema = z.object({
   email: EmailSchema,
@@ -43,16 +40,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   await requireAnonymous(request);
   const formData = await request.formData();
-  // const data = Object.fromEntries(formData.entries());
 
   const submission = await parseWithZod(formData, {
     schema: loginSchema.transform(async (data, ctx) => {
-      const user = await prisma.user.findUnique({
-        select: { id: true, password: true },
-        where: { email: data.email },
-      });
+      // const user = await prisma.user.findUnique({
+      //   select: { id: true, password: true },
+      //   where: { email: data.email },
+      // });
 
-      if (!user || !user.password) {
+      const { email, password } = data;
+      console.log(email, password);
+
+      const session = await login({ email, password });
+      console.log("session", session);
+
+      if (!session) {
         ctx.addIssue({
           path: ["global"],
           code: "custom",
@@ -61,21 +63,21 @@ export async function action({ request }: ActionFunctionArgs) {
         return z.NEVER;
       }
 
-      const pswd = data.password;
-      const hash = user.password?.hash;
+      // const pswd = data.password;
+      // const hash = user.password?.hash;
 
-      const isValid = await bcrypt.compare(pswd, hash);
+      // const isValid = await bcrypt.compare(pswd, hash);
 
-      if (!isValid) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Неверный адрес электронной почты или пароль",
-          path: ["global"],
-        });
-        return z.NEVER;
-      }
+      // if (!isValid) {
+      //   ctx.addIssue({
+      //     code: "custom",
+      //     message: "Неверный адрес электронной почты или пароль",
+      //     path: ["global"],
+      //   });
+      //   return z.NEVER;
+      // }
 
-      return { ...data, user: { id: user.id } };
+      return { ...data, session };
     }),
     async: true,
   });
@@ -85,12 +87,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If validation fails, return an error response
   if (submission.status !== "success") {
-    return data(
-      { status: "error", submission },
-      {
-        status: 400,
-      }
-    );
+    return { status: "error", submission };
   }
 
   // Handle non-submit intents (e.g., validation-only requests)
@@ -99,25 +96,20 @@ export async function action({ request }: ActionFunctionArgs) {
   // }
 
   // If validation fails, return an error response
-  if (!submission.value?.user) {
-    return data(
-      { status: "error", submission },
-      {
-        status: 400,
-      }
-    );
+  if (!submission.value?.session) {
+    return { status: "error", submission };
   }
 
   // If everything is successful, set the userId in the session cookie
-  const { user, remember } = submission.value;
+  const { session, remember } = submission.value;
   const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
-  cookieSession.set("userId", user.id);
+  cookieSession.set(sessionKey, session.id);
 
   // Redirect to the admin page with the updated session cookie
   return redirect("/admin", {
     headers: {
       "set-cookie": await sessionStorage.commitSession(cookieSession, {
-        expires: remember ? new Date(Date.now() + 30 * 24 * 60 * 100) : undefined,
+        expires: remember ? session.expirationDate : undefined,
       }),
     },
   });

@@ -31,3 +31,6 @@ export type ExampleType = {
   example: string,
   translation: string
 }
+
+
+export type RoleName = 'admin' | 'moderator' | 'user';

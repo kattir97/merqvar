@@ -16,7 +16,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";
 import { cn } from "~/lib/utils";
-import { prisma } from "../utils/db.server";
+import { prisma } from "../../utils/db.server";
 import { ErrorList } from "~/components/error-list";
 import { EmailSchema, PasswordSchema, UsernameSchema } from "~/utils/user-validation";
 import { sessionStorage } from "~/utils/session.server";
@@ -58,19 +58,7 @@ export async function action({ request }: ActionFunctionArgs) {
       .transform(async (data) => {
         const { email, password, username } = data;
 
-        // const user = await prisma.user.create({
-        //   select: { id: true },
-        //   data: {
-        //     email: email.toLowerCase(),
-        //     username: username.toLowerCase(),
-        //     roles: { connect: { name: "user" } },
-        //     password: {
-        //       create: {
-        //         hash: await bcrypt.hash(password, 10),
-        //       },
-        //     },
-        //   },
-        // });
+
 
         const session = await signup({ email, username, password });
 
@@ -219,7 +207,7 @@ export default function RegisterPage() {
           </div>
 
           <StatusButton
-            status={isSubmitting ? "pending" : "idle"}
+            status="idle"
             variant="outline"
             className="w-full"
           >

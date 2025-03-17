@@ -2,6 +2,7 @@ import { data, redirect } from "react-router";
 import { requireUserId } from "./auth.server";
 import { prisma } from "./db.server";
 import { useUser } from "./user";
+import { RoleName } from "@prisma/client";
 
 
 
@@ -58,7 +59,6 @@ function parsePermissionString(permissionString: PermissionString) {
   }
 }
 
-type RoleName = 'admin' | 'moderator' | 'user';
 
 export async function requireUserWithRole(request: Request, roles: RoleName[]) {
   const userId = await requireUserId(request)
@@ -97,10 +97,10 @@ export function userHasPermission(
   )
 }
 
-export function userHasRole(
+export function userHasRoles(
   user: Pick<ReturnType<typeof useUser>, 'roles'> | null,
-  role: string,
+  roles: RoleName[],
 ) {
   if (!user) return false
-  return user.roles.some(r => r.name === role)
+  return roles.some(role => user.roles.some(r => r.name === role))
 }

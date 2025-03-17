@@ -1,23 +1,8 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { useRouteLoaderData } from 'react-router';
 import { type loader as rootLoader } from '../root';
+import { RoleName } from '@prisma/client';
 
 export function useOptionalUser() {
   const data = useRouteLoaderData<typeof rootLoader>('root');
@@ -31,3 +16,5 @@ export function useUser() {
   }
   return maybeUser;
 }
+
+

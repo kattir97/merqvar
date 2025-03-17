@@ -123,6 +123,7 @@ export async function signup({
 }) {
   const hashedPassword = await getPasswordHash(password)
 
+
   const session = await prisma.session.create({
     data: {
       expirationDate: getSessionExpirationDate(),

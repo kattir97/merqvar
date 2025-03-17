@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { sessionStorage } from "./utils/session.server";
 import { prisma } from "./utils/db.server";
 import { getUserId, sessionKey } from "./utils/auth.server";
+import { userHasRoles } from "./utils/permissions";
 
 export const links: LinksFunction = () => {
   return [
@@ -46,39 +47,35 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const user = userId
     ? await prisma.user.findUnique({
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          roles: {
-            select: {
-              name: true,
-              permissions: {
-                select: {
-                  access: true,
-                  entity: true,
-                  action: true,
-                },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        roles: {
+          select: {
+            name: true,
+            permissions: {
+              select: {
+                access: true,
+                entity: true,
+                action: true,
               },
             },
           },
         },
-        where: { id: userId },
-      })
+      },
+      where: { id: userId },
+    })
     : null;
 
-  if (userId && !user) {
-    throw redirect("/", {
-      headers: {
-        "set-cookie": await sessionStorage.destroySession(cookieSession),
-      },
-    });
-  }
+
+  const hasAdminAcess = userHasRoles(user, ["admin", "moderator"]) as boolean;
 
   return {
     user: user,
     theme: getTheme(request),
     ENV: getEnv(),
+    hasAdminAcess,
   };
 }
 
@@ -107,7 +104,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-[100vh]">
         <Toaster />
-        <TopNavbar theme={theme} />
+        <TopNavbar theme={theme} hasAdminAccess={data.hasAdminAcess} />
         {children}
         {/* <ScrollRestoration /> */}
         <Scripts />

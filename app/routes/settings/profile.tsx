@@ -1,14 +1,14 @@
 import { NavLink, Outlet, useMatches } from "react-router";
 import { Fragment } from "react/jsx-runtime";
 import { z } from "zod";
+import { Container } from "~/components/container";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
+import { Card } from "~/components/ui/card";
 import { Spacer } from "~/components/ui/spacer";
 
 export const handle = {
@@ -36,13 +36,10 @@ export default function Profile() {
     .filter(Boolean);
 
   return (
-    <div className="m-auto mb-24 mt-16 max-w-3xl">
+    <div className="m-auto pb-24 mt-16 max-w-3xl">
       <div className="container">
         <Breadcrumb>
           <BreadcrumbList>
-            {/* <BreadcrumbItem>
-              <BreadcrumbLink href="/profile">Profile</BreadcrumbLink>
-            </BreadcrumbItem> */}
             {breadcrumbs.map((bc, i, arr) => {
               return (
                 <Fragment key={i}>
@@ -61,9 +58,9 @@ export default function Profile() {
         </Breadcrumb>
       </div>
       <Spacer size="xs" />
-      <main className="mx-auto bg-gray-50 px-6 py-8 md:container md:rounded-3xl">
+      <Card className="mx-auto  px-6 py-8 md:container md:rounded-3xl">
         <Outlet />
-      </main>
+      </Card>
     </div>
   );
 }

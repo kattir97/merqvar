@@ -25,14 +25,17 @@ import {
   UsernameSchema,
 } from "~/utils/user-validation";
 import { invariantResponse } from "~/lib/utils";
-import { requireUserId } from "~/utils/auth.server";
+import { requireUserId, sessionKey } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
+import { sessionStorage } from "~/utils/session.server";
+import { User } from "lucide-react";
 
 export const handle = {
   breadcrumb: "Edit Profile",
 };
 
 const profileUpdateActionIntent = "update-profile";
+const signOutOfSessionsActionIntent = "sign-out-of-sessions";
 
 const updateProfileSchema = z.object({
   email: EmailSchema,
@@ -80,6 +83,9 @@ export async function action({ request }: ActionFunctionArgs) {
       console.log("firing action");
       return profileUpdateAction({ request, userId, formData });
     }
+    case signOutOfSessionsActionIntent: {
+      return signOutOfSessionsAction({ request, userId, formData });
+    }
 
     default: {
       throw new Response(`Invalid intent "${intent}"`, { status: 400 });
@@ -95,6 +101,8 @@ export default function EditUserProfile() {
         <AvatarFallback>AV</AvatarFallback>
       </Avatar>
       <ProfileUpdate />
+      <div className="col-span-6 my-6 h-1 border-b-[1.5px] border-foreground" />
+      <SignOutOfSessions />
     </div>
   );
 }
@@ -138,7 +146,7 @@ function ProfileUpdate() {
       </div>
       <ErrorList errors={form.errors} id={form.errorId} />
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex">
         <StatusButton
           type="submit"
           name="intent"
@@ -156,7 +164,7 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
   const submission = await parseWithZod(formData, {
     async: true,
     schema: updateProfileSchema.superRefine(
-      async ({ email, username, name }, ctx) => {
+      async ({ email, username }, ctx) => {
         const existingUsername = await prisma.user.findUnique({
           where: { username },
           select: { id: true },
@@ -211,4 +219,41 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
   });
 
   return { status: "success", submission };
+}
+
+//=================================================================
+
+async function signOutOfSessionsAction({ request, userId }: ProfileActionArgs) {
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get("cookie")
+  );
+  const sessionId = cookieSession.get(sessionKey);
+  invariantResponse("You must be authenticated to sign out of other sessions");
+  await prisma.session.deleteMany({
+    where: { userId, id: { not: sessionId } },
+  });
+  return { status: "success" };
+}
+
+function SignOutOfSessions() {
+  const data = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<typeof signOutOfSessionsAction>();
+  const otherSessionsCount = data.user._count.sessions - 1;
+
+  return otherSessionsCount ? (
+    <fetcher.Form method="POST">
+      <StatusButton
+        status={fetcher.state !== "idle" ? "pending" : "idle"}
+        name="intent"
+        value={signOutOfSessionsActionIntent}
+      >
+        {`Sign out of ${otherSessionsCount} other sessions`}
+      </StatusButton>
+    </fetcher.Form>
+  ) : (
+    <div className="flex gap-2 items-center">
+      <User />
+      <span>This is your only session</span>
+    </div>
+  );
 }

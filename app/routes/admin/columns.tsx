@@ -23,7 +23,9 @@ export const columns: ColumnDef<AdminWord>[] = [
     accessorKey: "translations",
     header: "Перевод",
     cell: ({ row }) => {
-      const translations = row.getValue("translations") as { translation: string }[];
+      const translations = row.getValue("translations") as {
+        translation: string;
+      }[];
       return translations.map((t) => t.translation).join(", ");
     },
   },
@@ -48,7 +50,6 @@ export const columns: ColumnDef<AdminWord>[] = [
     id: "actions", // Unique ID for the actions column
     header: "Действия",
     cell: ({ cell }) => {
-      // console.log("cell", cell);
       const wordData = cell.row.original;
       return <ActionButtons wordData={wordData} />;
     },

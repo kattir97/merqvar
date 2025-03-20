@@ -1,11 +1,9 @@
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { ThemeSwitch } from "../routes/theme-switch";
 import { Theme } from "~/types/theme";
 import { useOptionalUser } from "~/utils/user";
-import AccountDropdown from "./account-dropdown";
-import { NavLink } from "react-router";
-import { BookA, MonitorCog, Table, User } from "lucide-react";
-import { Badge, badgeVariants } from "./ui/badge";
+import { MonitorCog, User } from "lucide-react";
+import { Badge } from "./ui/badge";
 import "@fontsource/anta";
 
 const TopNavbar = ({
@@ -43,7 +41,6 @@ const TopNavbar = ({
             </Badge>
           </NavLink>
         ) : null}
-        {/* {user ? <AccountDropdown /> : null} */}
       </div>
     </nav>
   );

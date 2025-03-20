@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 // id: 'cm5fp68ag0008twb4mxqdwstw',
 // headword: 'ахв',
 // ergative: 'а',
@@ -13,6 +12,7 @@ import { z } from "zod";
 // translations: [Array]
 
 export const wordSchema = z.object({
+  id: z.string().optional(),
   headword: z.string({ required_error: "Требуется слово" }).min(1).max(100),
   root: z.string().min(1).max(100).optional(),
   ergative: z
@@ -22,15 +22,26 @@ export const wordSchema = z.object({
     .optional()
     .transform((value) => value?.toLowerCase()),
   speechPart: z
-    .enum(["существительное", "прилагательное", "глагол", "междометие", "числительное"], {
-      required_error: "Требуется часть речи",
-    })
+    .enum(
+      [
+        "существительное",
+        "прилагательное",
+        "глагол",
+        "междометие",
+        "числительное",
+      ],
+      {
+        required_error: "Требуется часть речи",
+      }
+    )
     .transform((value) => value?.toLowerCase()),
   origin: z
     .enum(["агульский", "персидский", "арабский", "русский", "тюркский"])
     .optional()
     .transform((value) => value?.toLowerCase()),
-  translations: z.array(z.string({ required_error: "Требуется перевод" }).min(1)).min(1),
+  translations: z
+    .array(z.string({ required_error: "Требуется перевод" }).min(1))
+    .min(1),
   examples: z
     .array(
       z.object({
@@ -42,7 +53,5 @@ export const wordSchema = z.object({
   tags: z.array(z.string()).optional(),
   createdAt: z.string().optional(),
 });
-
-
 
 export type WordType = z.infer<typeof wordSchema>;

@@ -28,7 +28,7 @@ import { invariantResponse } from "~/lib/utils";
 import { requireUserId, sessionKey } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { sessionStorage } from "~/utils/session.server";
-import { User, UserCircle } from "lucide-react";
+import { User } from "lucide-react";
 
 export const handle = {
   breadcrumb: "Edit Profile",
@@ -74,13 +74,9 @@ export async function action({ request }: ActionFunctionArgs) {
   const userId = await requireUserId(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
-  const formObject = Object.fromEntries(formData.entries());
-
-  console.log("formObject", formObject);
 
   switch (intent) {
     case profileUpdateActionIntent: {
-      console.log("firing action");
       return profileUpdateAction({ request, userId, formData });
     }
     case signOutOfSessionsActionIntent: {
@@ -194,12 +190,8 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
     ),
   });
 
-  const intent = formData.get("intent") as string;
-  console.log("intent", intent);
-
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {
-    console.log("no success", submission.reply());
     return submission.reply();
   }
 
@@ -208,7 +200,6 @@ async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
   }
 
   const data = submission.value;
-  console.log("data", { ...data });
 
   await prisma.user.update({
     select: { username: true },

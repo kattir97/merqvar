@@ -1,10 +1,9 @@
 import { LoaderFunction, type MetaFunction } from "react-router";
-import { useLoaderData, useNavigate, useSearchParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useLoaderData, useSearchParams } from "react-router";
 import { Container } from "~/components/container";
 import { SearchBar } from "~/components/search-bar";
-import { WordType } from "~/types/types";
 import { fullTextSearch } from "~/utils/full-text-search";
+import { WordServerType } from "~/types/types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,29 +26,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function Index() {
-  const results = useLoaderData<WordType[]>();
-  const navigate = useNavigate();
-  const [resultsUiState, setResultsUiState] = useState("");
+  const results = useLoaderData<WordServerType[]>();
+
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query");
+  const hasResults = results.length > 0;
 
-  // Clear the query parameter on page load
-  useEffect(() => {
-    if (query) {
-      navigate("/", { replace: true }); // Remove query parameter from the URL
-    }
-  }, []);
-
-  useEffect(() => {
-    // Update resultsUiState based on results
-    if (!query) {
-      setResultsUiState(""); // Empty on refresh or no query
-    } else if (query && results.length === 0) {
-      setResultsUiState("Not found");
-    } else {
-      setResultsUiState(""); // Reset UI state if results are found
-    }
-  }, [query, results]);
+  const resultsUiState = query && !hasResults ? "Not found" : "";
 
   return (
     <Container>
@@ -58,9 +41,9 @@ export default function Index() {
       <div className="my-5">
         {query && results.length > 0 ? (
           <ul>
-            {results.map((word: WordType) => (
+            {results.map((word: WordServerType) => (
               <div className="border rounded-md p-2 my-2" key={word.id}>
-                <span className="text-2xl font-semibold">{word.headword}</span> -{" "}
+                <span className="text-2xl font-semibold">{word.headword}</span>{" "}
                 <span className="italic">
                   {word.translations.map((tr) => tr.translation).join(", ")}
                 </span>

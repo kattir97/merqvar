@@ -1,14 +1,24 @@
-import { Links, Meta, Outlet, redirect, Scripts, useFetchers, useLoaderData } from "react-router";
-import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  useFetchers,
+  useLoaderData,
+} from "react-router";
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "react-router";
 
 import tailwindStyleSheetUrl from "./styles/tailwind.css?url";
 import { TopNavbar } from "./components/top-navbar";
 import { getEnv } from "./utils/env.server";
 import { getTheme } from "./utils/theme.server";
 import { Toaster } from "sonner";
-import { sessionStorage } from "./utils/session.server";
 import { prisma } from "./utils/db.server";
-import { getUserId, sessionKey } from "./utils/auth.server";
+import { getUserId } from "./utils/auth.server";
 import { userHasRoles } from "./utils/permissions";
 
 export const links: LinksFunction = () => {
@@ -47,27 +57,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const user = userId
     ? await prisma.user.findUnique({
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        roles: {
-          select: {
-            name: true,
-            permissions: {
-              select: {
-                access: true,
-                entity: true,
-                action: true,
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          roles: {
+            select: {
+              name: true,
+              permissions: {
+                select: {
+                  access: true,
+                  entity: true,
+                  action: true,
+                },
               },
             },
           },
         },
-      },
-      where: { id: userId },
-    })
+        where: { id: userId },
+      })
     : null;
-
 
   const hasAdminAcess = userHasRoles(user, ["admin", "moderator"]) as boolean;
 
@@ -82,7 +91,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
 function useTheme() {
   const data = useLoaderData<typeof loader>();
   const fetchers = useFetchers();
-  const themeFetcher = fetchers.find((f) => f.formData?.get("intent") === "update-theme");
+  const themeFetcher = fetchers.find(
+    (f) => f.formData?.get("intent") === "update-theme"
+  );
   const optimisticTheme = themeFetcher?.formData?.get("theme");
   if (optimisticTheme === "light" || optimisticTheme === "dark") {
     return optimisticTheme;

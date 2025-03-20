@@ -1,4 +1,9 @@
-import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
+import {
+  getFormProps,
+  getInputProps,
+  SubmissionResult,
+  useForm,
+} from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
   ActionFunctionArgs,
@@ -49,10 +54,8 @@ export async function action({ request }: ActionFunctionArgs) {
       // });
 
       const { email, password } = data;
-      console.log(email, password);
 
       const session = await login({ email, password });
-      console.log("session", session);
 
       if (!session) {
         ctx.addIssue({
@@ -102,7 +105,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If everything is successful, set the userId in the session cookie
   const { session, remember } = submission.value;
-  const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get("cookie")
+  );
   cookieSession.set(sessionKey, session.id);
 
   // Redirect to the admin page with the updated session cookie
@@ -158,7 +163,11 @@ export default function LoginPage() {
 
   return (
     <div className="flex justify-center items-center p-10">
-      <Form method="POST" {...getFormProps(form)} className={cn("flex flex-col gap-6 ")}>
+      <Form
+        method="POST"
+        {...getFormProps(form)}
+        className={cn("flex flex-col gap-6 ")}
+      >
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
           <p className="text-balance text-sm text-muted-foreground">
@@ -196,12 +205,19 @@ export default function LoginPage() {
               <Checkbox id={fields.remember.id} name={fields.remember.name} />
               <label htmlFor={fields.remember.id}>Remember me</label>
             </div>
-            <Link to="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+            <Link
+              to="#"
+              className="ml-auto text-sm underline-offset-4 hover:underline"
+            >
               Forgot your password?
             </Link>
           </div>
           <ErrorList id={form.errorId} errors={globalError} />
-          <StatusButton status={isSubmitting ? "pending" : "idle"} type="submit" className="w-full">
+          <StatusButton
+            status={isSubmitting ? "pending" : "idle"}
+            type="submit"
+            className="w-full"
+          >
             Login
           </StatusButton>
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">

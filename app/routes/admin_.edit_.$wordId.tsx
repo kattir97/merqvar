@@ -11,7 +11,12 @@ import {
 } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
+import {
+  getFormProps,
+  getInputProps,
+  SubmissionResult,
+  useForm,
+} from "@conform-to/react";
 import { z } from "zod";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
@@ -70,9 +75,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     return submission.reply();
   }
 
-  // throw new Error("Simulated error while saving to Prisma");
-  const { data: wordData } = await saveWord(data, wordId);
-  console.log("wordToSave:", wordData);
+  await saveWord(data, wordId);
 
   return redirect("/admin");
 }
@@ -119,22 +122,37 @@ export default function EditWord() {
               <Label htmlFor={fields.headword.id} className="sr-only">
                 Слово
               </Label>
-              <Input {...getInputProps(fields.headword, { type: "text" })} placeholder="Слово" />
-              <ErrorList id={fields.headword.errorId} errors={fields.headword.errors} />
+              <Input
+                {...getInputProps(fields.headword, { type: "text" })}
+                placeholder="Слово"
+              />
+              <ErrorList
+                id={fields.headword.errorId}
+                errors={fields.headword.errors}
+              />
             </fieldset>
             <fieldset>
               <Label htmlFor={fields.root.id} className="sr-only">
                 Корень
               </Label>
-              <Input {...getInputProps(fields.root, { type: "text" })} placeholder="Корень" />
+              <Input
+                {...getInputProps(fields.root, { type: "text" })}
+                placeholder="Корень"
+              />
               <ErrorList id={fields.root.errorId} errors={fields.root.errors} />
             </fieldset>
             <fieldset>
               <Label htmlFor={fields.ergative.id} className="sr-only">
                 Эргатив
               </Label>
-              <Input {...getInputProps(fields.ergative, { type: "text" })} placeholder="Эргатив" />
-              <ErrorList id={fields.ergative.errorId} errors={fields.ergative.errors} />
+              <Input
+                {...getInputProps(fields.ergative, { type: "text" })}
+                placeholder="Эргатив"
+              />
+              <ErrorList
+                id={fields.ergative.errorId}
+                errors={fields.ergative.errors}
+              />
             </fieldset>
             <fieldset>
               <SpeechPart form={form} fields={fields} />

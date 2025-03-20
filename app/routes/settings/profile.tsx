@@ -24,7 +24,6 @@ export default function Profile() {
   const breadcrumbs = matches
     .map((m) => {
       const result = BreadcrumbHandleMatch.safeParse(m);
-      // console.log("result", result);
       if (!result.success || !result.data.handle.breadcrumb) return null;
       return (
         <NavLink key={m.id} to={m.pathname} className="flex items-center">

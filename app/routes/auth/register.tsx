@@ -1,4 +1,9 @@
-import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
+import {
+  getFormProps,
+  getInputProps,
+  SubmissionResult,
+  useForm,
+} from "@conform-to/react";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
   Form,
@@ -15,12 +20,17 @@ import { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";
-import { cn } from "~/lib/utils";
+import { cn, invariantResponse } from "~/lib/utils";
 import { prisma } from "../../utils/db.server";
 import { ErrorList } from "~/components/error-list";
-import { EmailSchema, PasswordSchema, UsernameSchema } from "~/utils/user-validation";
+import {
+  EmailSchema,
+  PasswordSchema,
+  UsernameSchema,
+} from "~/utils/user-validation";
 import { sessionStorage } from "~/utils/session.server";
 import { requireAnonymous, sessionKey, signup } from "~/utils/auth.server";
+import { HoneypotInputs } from "remix-utils/honeypot/react";
 
 const registerSchema = z.object({
   email: EmailSchema,
@@ -36,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export async function action({ request }: ActionFunctionArgs) {
   await requireAnonymous(request);
   const formData = await request.formData();
-  // const data = Object.fromEntries(formData.entries());
+  invariantResponse(formData.get("name") === "", "form not submited properly");
 
   const submission = await parseWithZod(formData, {
     schema: registerSchema
@@ -57,8 +67,6 @@ export async function action({ request }: ActionFunctionArgs) {
       })
       .transform(async (data) => {
         const { email, password, username } = data;
-
-
 
         const session = await signup({ email, username, password });
 
@@ -96,7 +104,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // If everything is successful, set the userId in the session cookie
   const { session } = submission.value;
-  const cookieSession = await sessionStorage.getSession(request.headers.get("cookie"));
+  const cookieSession = await sessionStorage.getSession(
+    request.headers.get("cookie")
+  );
   cookieSession.set(sessionKey, session.id);
 
   // Redirect to the admin page with the updated session cookie
@@ -154,7 +164,15 @@ export default function RegisterPage() {
 
   return (
     <div className="flex justify-center items-center p-10">
-      <Form method="POST" {...getFormProps(form)} className={cn("flex flex-col gap-6 ")}>
+      <Form
+        method="POST"
+        {...getFormProps(form)}
+        className={cn("flex flex-col gap-6 ")}
+      >
+        {/* ================HONEYPOT====================== */}
+        <HoneypotInputs label="lease leave this field blank" />
+        {/* ================HONEYPOT====================== */}
+
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Create an account</h1>
           <p className="text-balance text-sm text-muted-foreground">
@@ -197,7 +215,11 @@ export default function RegisterPage() {
             <ErrorList id={fields.password.errorId} errors={passwordError} />
           </div>
           <ErrorList id={form.errorId} errors={globalError} />
-          <StatusButton status={isSubmitting ? "pending" : "idle"} type="submit" className="w-full">
+          <StatusButton
+            status={isSubmitting ? "pending" : "idle"}
+            type="submit"
+            className="w-full"
+          >
             Sign Up
           </StatusButton>
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -206,11 +228,7 @@ export default function RegisterPage() {
             </span>
           </div>
 
-          <StatusButton
-            status="idle"
-            variant="outline"
-            className="w-full"
-          >
+          <StatusButton status="idle" variant="outline" className="w-full">
             GitHub
           </StatusButton>
         </div>

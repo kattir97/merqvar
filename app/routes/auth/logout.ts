@@ -1,16 +1,10 @@
-import { redirect } from "react-router";
-import { sessionStorage } from "~/utils/session.server";
+import { ActionFunctionArgs, redirect } from "react-router";
+import { logout } from "~/utils/auth.server";
 
+export async function loader() {
+  return redirect("/");
+}
 
-
-export async function action() {
-  const cookieSession = await sessionStorage.getSession();
-
-  return redirect("/", {
-    headers: {
-      'set-cookie': await sessionStorage.destroySession(cookieSession)
-    }
-  })
-
-
+export async function action({ request }: ActionFunctionArgs) {
+  throw await logout({ request });
 }

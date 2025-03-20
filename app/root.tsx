@@ -20,6 +20,8 @@ import { Toaster } from "sonner";
 import { prisma } from "./utils/db.server";
 import { getUserId } from "./utils/auth.server";
 import { userHasRoles } from "./utils/permissions";
+import { honeypot } from "./utils/honeypot.server";
+import { HoneypotProvider } from "remix-utils/honeypot/react";
 
 export const links: LinksFunction = () => {
   return [
@@ -85,6 +87,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     theme: getTheme(request),
     ENV: getEnv(),
     hasAdminAcess,
+    honeypotInputProps: honeypot.getInputProps(),
   };
 }
 
@@ -129,6 +132,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
+function App() {
   return <Outlet />;
+}
+
+export default function AppWithProvider() {
+  const data = useLoaderData<typeof loader>();
+  return (
+    <HoneypotProvider {...data.honeypotInputProps}>
+      <App />;
+    </HoneypotProvider>
+  );
 }

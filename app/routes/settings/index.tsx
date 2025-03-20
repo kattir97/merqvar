@@ -7,6 +7,7 @@ import {
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import {
   ActionFunctionArgs,
+  Form,
   LoaderFunctionArgs,
   useActionData,
   useFetcher,
@@ -28,7 +29,8 @@ import { invariantResponse } from "~/lib/utils";
 import { requireUserId, sessionKey } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { sessionStorage } from "~/utils/session.server";
-import { User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
+import { Button } from "~/components/ui/button";
 
 export const handle = {
   breadcrumb: "Edit Profile",
@@ -101,6 +103,7 @@ export default function EditUserProfile() {
       <ProfileUpdate />
       <div className="col-span-6 my-6 h-1 border-b-[1.5px] border-foreground" />
       <SignOutOfSessions />
+      <LougOut />
     </div>
   );
 }
@@ -248,5 +251,22 @@ function SignOutOfSessions() {
       <User />
       <span>This is your only session</span>
     </div>
+  );
+}
+
+//=================================================================
+
+function LougOut() {
+  return (
+    <Form method="POST" action="/logout" id="logout-form" className="mt-5">
+      <Button
+        type="submit"
+        variant={"destructive"}
+        className="flex items-center space-x-2"
+      >
+        <LogOut className="h-4 w-4" />
+        <span>Logout</span>
+      </Button>
+    </Form>
   );
 }

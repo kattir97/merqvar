@@ -26,6 +26,7 @@ import { sessionStorage } from "~/utils/session.server";
 import { useState } from "react";
 import { Checkbox } from "~/components/ui/checkbox";
 import { login, requireAnonymous, sessionKey } from "~/utils/auth.server";
+import { HoneypotInputs } from "remix-utils/honeypot/react";
 
 const loginSchema = z.object({
   email: EmailSchema,
@@ -168,6 +169,7 @@ export default function LoginPage() {
         {...getFormProps(form)}
         className={cn("flex flex-col gap-6 ")}
       >
+        <HoneypotInputs label="lease leave this field blank" />
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-2xl font-bold">Login to your account</h1>
           <p className="text-balance text-sm text-muted-foreground">

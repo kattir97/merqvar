@@ -14,7 +14,7 @@ import {
 } from "react-router";
 import { z } from "zod";
 import { ErrorList } from "~/components/error-list";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Avatar } from "~/components/ui/avatar";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";
@@ -28,7 +28,7 @@ import { invariantResponse } from "~/lib/utils";
 import { requireUserId, sessionKey } from "~/utils/auth.server";
 import { prisma } from "~/utils/db.server";
 import { sessionStorage } from "~/utils/session.server";
-import { User } from "lucide-react";
+import { User, UserCircle } from "lucide-react";
 
 export const handle = {
   breadcrumb: "Edit Profile",
@@ -97,8 +97,10 @@ export default function EditUserProfile() {
   return (
     <div>
       <Avatar className="h-40 w-40 mb-10">
-        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-        <AvatarFallback>AV</AvatarFallback>
+        <div className="rounded-full bg-gray-200 flex items-center justify-center h-full w-full">
+          <User className="h-32 w-32 text-gray-800" />{" "}
+          {/* Adjust size and color */}
+        </div>
       </Avatar>
       <ProfileUpdate />
       <div className="col-span-6 my-6 h-1 border-b-[1.5px] border-foreground" />

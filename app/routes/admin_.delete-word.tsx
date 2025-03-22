@@ -1,11 +1,13 @@
 import { prisma } from "~/utils/db.server";
 import { ActionFunction, redirect } from "react-router";
 import { toastSessionStorage } from "~/utils/toast.server";
-import { requireAdmin } from "~/utils/auth.server";
+import { requireAdminOrModer } from "~/utils/auth.server";
+import { csrf } from "~/utils/csrf.server";
 
 export const action: ActionFunction = async ({ request }) => {
-  await requireAdmin(request);
+  await requireAdminOrModer(request);
   const formData = await request.formData();
+  csrf.validate(formData, request.headers);
   const wordId = formData.get("wordId");
   const headword = formData.get("headword");
 
@@ -25,7 +27,9 @@ export const action: ActionFunction = async ({ request }) => {
 
       return redirect("/admin", {
         headers: {
-          "set-cookie": await toastSessionStorage.commitSession(toastCookieSession),
+          "set-cookie": await toastSessionStorage.commitSession(
+            toastCookieSession
+          ),
         },
       }); // Adjust to your admin page route
     } catch (error) {

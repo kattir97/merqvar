@@ -1,4 +1,5 @@
 import {
+  data,
   Links,
   Meta,
   Outlet,
@@ -22,6 +23,8 @@ import { getUserId } from "./utils/auth.server";
 import { userHasRoles } from "./utils/permissions";
 import { honeypot } from "./utils/honeypot.server";
 import { HoneypotProvider } from "remix-utils/honeypot/react";
+import { AuthenticityTokenProvider } from "remix-utils/csrf/react";
+import { csrf } from "./utils/csrf.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -56,6 +59,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const userId = await getUserId(request);
+  const [csrfToken, csrfCookieHeader] = await csrf.commitToken(request);
 
   const user = userId
     ? await prisma.user.findUnique({
@@ -82,13 +86,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const hasAdminAcess = userHasRoles(user, ["admin", "moderator"]) as boolean;
 
-  return {
+  const loaderData = {
     user: user,
     theme: getTheme(request),
     ENV: getEnv(),
     hasAdminAcess,
     honeypotInputProps: honeypot.getInputProps(),
+    csrfToken,
   };
+
+  // return new Response(JSON.stringify(data), {
+  //   headers: csrfCookieHeader ? { "set-cookie": csrfCookieHeader } : {},
+  // });
+  //
+  return data(loaderData, {
+    headers: csrfCookieHeader ? { "set-cookie": csrfCookieHeader } : {},
+  });
 }
 
 function useTheme() {
@@ -139,8 +152,10 @@ function App() {
 export default function AppWithProvider() {
   const data = useLoaderData<typeof loader>();
   return (
-    <HoneypotProvider {...data.honeypotInputProps}>
-      <App />;
-    </HoneypotProvider>
+    <AuthenticityTokenProvider token={data.csrfToken}>
+      <HoneypotProvider {...data.honeypotInputProps}>
+        <App />
+      </HoneypotProvider>
+    </AuthenticityTokenProvider>
   );
 }

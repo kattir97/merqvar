@@ -15,6 +15,7 @@ import { Form, Link } from "react-router";
 import { Button } from "./ui/button";
 import { WordColumnType } from "~/types/types";
 import { useUser } from "~/utils/user";
+import { AuthenticityTokenInput } from "remix-utils/csrf/react";
 
 const ActionButtons = ({ wordData }: { wordData: WordColumnType }) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -41,12 +42,15 @@ const ActionButtons = ({ wordData }: { wordData: WordColumnType }) => {
       <AlertDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Вы уверены что хотите удалить это слово?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Вы уверены что хотите удалить это слово?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Это действие нельзя отменить. Это навсегда удалит данное слово.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Form method="POST" action="/admin/delete-word">
+            <AuthenticityTokenInput />
             <AlertDialogFooter>
               <AlertDialogCancel>Отменить</AlertDialogCancel>
               <Button

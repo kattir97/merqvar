@@ -31,6 +31,8 @@ import { prisma } from "~/utils/db.server";
 import { sessionStorage } from "~/utils/session.server";
 import { LogOut, User } from "lucide-react";
 import { Button } from "~/components/ui/button";
+import { AuthenticityTokenInput } from "remix-utils/csrf/react";
+import { csrf } from "~/utils/csrf.server";
 
 export const handle = {
   breadcrumb: "Edit Profile",
@@ -130,6 +132,7 @@ function ProfileUpdate() {
 
   return (
     <fetcher.Form method="POST" {...getFormProps(form)}>
+      <AuthenticityTokenInput />
       <div className="grid grid-cols-2 w-full max-w-lg gap-8 mb-5">
         <fieldset>
           <Label htmlFor="username">Username</Label>
@@ -161,7 +164,13 @@ function ProfileUpdate() {
   );
 }
 
-async function profileUpdateAction({ userId, formData }: ProfileActionArgs) {
+async function profileUpdateAction({
+  userId,
+  formData,
+  request,
+}: ProfileActionArgs) {
+  csrf.validate(formData, request.headers);
+
   const submission = await parseWithZod(formData, {
     async: true,
     schema: updateProfileSchema.superRefine(

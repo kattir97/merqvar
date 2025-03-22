@@ -4,6 +4,7 @@ import { Container } from "~/components/container";
 import { SearchBar } from "~/components/search-bar";
 import { fullTextSearch } from "~/utils/full-text-search";
 import { WordServerType } from "~/types/types";
+import { SearchX } from "lucide-react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -32,7 +33,7 @@ export default function Index() {
   const query = searchParams.get("query");
   const hasResults = results.length > 0;
 
-  const resultsUiState = query && !hasResults ? "Not found" : "";
+  const resultsUiState = query && !hasResults ? "Слово не найдено" : "";
 
   return (
     <Container>
@@ -43,7 +44,8 @@ export default function Index() {
           <ul>
             {results.map((word: WordServerType) => (
               <div className="border rounded-md p-2 my-2" key={word.id}>
-                <span className="text-2xl font-semibold">{word.headword}</span>{" "}
+                <span className="text-2xl font-semibold">{word.headword}</span>
+                {" - "}
                 <span className="italic">
                   {word.translations.map((tr) => tr.translation).join(", ")}
                 </span>
@@ -63,7 +65,12 @@ export default function Index() {
             ))}
           </ul>
         ) : (
-          <p>{resultsUiState}</p>
+          <div className="flex items-center justify-center mt-10 text-lg">
+            <div className="flex flex-col items-center justify-center">
+              <SearchX size="40" />
+              {resultsUiState}
+            </div>
+          </div>
         )}
       </div>
     </Container>

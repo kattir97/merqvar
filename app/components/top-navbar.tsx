@@ -1,11 +1,5 @@
-import {
-  Link,
-  NavLink,
-  useActionData,
-  useLoaderData,
-  useNavigate,
-} from "react-router";
-import { action, loader, ThemeSwitch } from "../routes/theme-switch";
+import { Link, NavLink } from "react-router";
+import { ThemeSwitch } from "../routes/theme-switch";
 import { Theme } from "~/types/theme";
 import { useOptionalUser } from "~/utils/user";
 import { Menu, MonitorCog, User, X } from "lucide-react";
@@ -34,11 +28,7 @@ const TopNavbar = ({
 
   return (
     <nav className="flex justify-between items-center shadow-sm p-3 border-b h-[4rem]">
-      <Link
-        to="/"
-        className="font-anta text-sm md:text-lg lg:text-xl"
-        onClick={clearSearchInput}
-      >
+      <Link to="/" className="font-anta text-xl" onClick={clearSearchInput}>
         Merqvar
       </Link>
 

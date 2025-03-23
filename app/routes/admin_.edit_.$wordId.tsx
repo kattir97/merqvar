@@ -103,12 +103,20 @@ export default function EditWord() {
       speechPart: loaderData?.speechPart,
       origin: loaderData?.origin,
       translations: [...trs],
-      examples: loaderData?.examples.map((ex) => {
-        return {
-          example: ex.example,
-          translation: ex.translation,
-        };
-      }),
+      examples:
+        loaderData?.examples && loaderData.examples.length > 0
+          ? loaderData?.examples.map((ex) => {
+              return {
+                example: ex.example,
+                translation: ex.translation,
+              };
+            })
+          : [
+              {
+                example: "",
+                translation: "",
+              },
+            ],
     },
   });
 

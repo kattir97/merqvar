@@ -3,9 +3,9 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ErrorList } from "./error-list";
 import { useForm } from "@conform-to/react";
-import { wordSchema } from "~/routes/admin_.add-word";
 import { z } from "zod";
 import { useState } from "react";
+import { wordSchema } from "~/types/word-schema";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 
@@ -61,13 +61,7 @@ export const Examples = ({ form, fields }: ExamplesProps) => {
                 placeholder={`Перевод ${index + 1}`}
                 defaultValue={ex.initialValue?.translation}
               />
-              <button
-                onClick={handleAddExample}
-                // {...form.insert.getButtonProps({
-                //   name: fields.examples.name,
-                //   index: index + 1,
-                // })}
-              >
+              <button onClick={handleAddExample}>
                 <PlusCircleIcon
                   className="hover:text-green-500 transition-all duration-200 cursor-pointer"
                   size={24}

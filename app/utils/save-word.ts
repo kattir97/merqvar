@@ -1,14 +1,14 @@
 import { prisma } from "./db.server";
 
-export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wordId?: string) {
+export async function saveWord(
+  formData: { [k: string]: FormDataEntryValue },
+  wordId?: string
+) {
   const { headword, root, ergative, speechPart, origin } = formData;
 
-
   const translations = Object.keys(formData)
-    .filter((key) => key.startsWith('translations['))
-    .map(key => ({ 'translation': formData[key] } as { 'translation': string }));
-
-
+    .filter((key) => key.startsWith("translations["))
+    .map((key) => ({ translation: formData[key] } as { translation: string }));
 
   // Parse `examples` into an array of objects with `example` and `translation`
   const examples = Object.keys(formData)
@@ -16,7 +16,7 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
     .reduce((acc, key) => {
       const match = key.match(/^examples(\d+)\.(example|translation)$/);
       if (match) {
-        type FieldType = 'example' | 'translation';
+        type FieldType = "example" | "translation";
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, index, field] = match;
         const exampleIndex = parseInt(index, 10);
@@ -32,7 +32,12 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
       return acc;
     }, [] as { example: string; translation: string }[]);
 
-
+  // Filter out empty examples (both fields are empty)
+  const filteredExamples = examples.filter((ex) => {
+    const exampleTrimmed = ex.example.trim();
+    const translationTrimmed = ex.translation.trim();
+    return exampleTrimmed !== "" || translationTrimmed !== "";
+  });
 
   const wordData = {
     headword: headword as string,
@@ -44,7 +49,7 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
       create: translations,
     },
     examples: {
-      create: examples,
+      create: filteredExamples,
     },
   };
 
@@ -60,7 +65,7 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
         },
         examples: {
           deleteMany: {}, // Delete existing examples
-          create: examples,
+          create: filteredExamples,
         },
       },
     });
@@ -72,8 +77,6 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
   }
 
   return { data: wordData };
-
-
 
   // // Return the data in the expected format for Prisma
   // return {
@@ -94,4 +97,3 @@ export async function saveWord(formData: { [k: string]: FormDataEntryValue }, wo
   //   }
   // };
 }
-

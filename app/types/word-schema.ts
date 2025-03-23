@@ -42,14 +42,14 @@ export const wordSchema = z.object({
   translations: z
     .array(z.string({ required_error: "Требуется перевод" }).min(1))
     .min(1),
-  examples: z
-    .array(
-      z.object({
-        example: z.string().optional(),
-        translation: z.string().optional(),
+  examples: z.array(
+    z
+      .object({
+        example: z.string().min(1),
+        translation: z.string().min(1),
       })
-    )
-    .optional(),
+      .refine((obj) => obj.example.trim() || obj.translation?.trim())
+  ),
   tags: z.array(z.string()).optional(),
   createdAt: z.string().optional(),
 });

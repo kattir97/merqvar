@@ -11,7 +11,7 @@ export const Container = ({
 }: ContainerProps): JSX.Element => {
   return (
     <div
-      className={`flex flex-col ${maxWidth} mt-10 mx-auto h-full p-2 sm:p-4 lg:px-20 xl:p-0`}
+      className={`flex flex-col ${maxWidth} mt-10 mx-auto h-full px-2 sm:px-4 lg:px-20 xl:p-0`}
     >
       {children}
     </div>

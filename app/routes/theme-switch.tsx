@@ -1,7 +1,6 @@
 import { getFormProps, SubmissionResult, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { ActionFunctionArgs, data } from "react-router";
-import { json, useFetcher } from "react-router";
+import { data, useFetcher, ActionFunctionArgs } from "react-router";
 import { Moon, Sun } from "lucide-react";
 import { z } from "zod";
 import { invariantResponse } from "~/lib/utils";
@@ -12,10 +11,19 @@ const ThemeFormSchema = z.object({
   theme: z.enum(["light", "dark"]),
 });
 
+type ThemeSwitchProps = {
+  userPreference?: Theme;
+  className?: string;
+};
+
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
 
-  invariantResponse(formData.get("intent") === "update-theme", "Invalid intent", { status: 404 });
+  invariantResponse(
+    formData.get("intent") === "update-theme",
+    "Invalid intent",
+    { status: 404 }
+  );
 
   const submission = parseWithZod(formData, { schema: ThemeFormSchema });
 
@@ -33,7 +41,7 @@ export async function action({ request }: ActionFunctionArgs) {
   return data({ success: true, submission }, responseInit);
 }
 
-export function ThemeSwitch({ userPreference }: { userPreference?: Theme }) {
+export function ThemeSwitch({ userPreference, className }: ThemeSwitchProps) {
   const fetcher = useFetcher<typeof action>();
   const lastResult = fetcher.data as SubmissionResult | undefined;
   const mode = userPreference || "light";
@@ -53,7 +61,12 @@ export function ThemeSwitch({ userPreference }: { userPreference?: Theme }) {
   };
 
   return (
-    <fetcher.Form method="POST" action="/theme-switch" {...getFormProps(form)}>
+    <fetcher.Form
+      method="POST"
+      action="/theme-switch"
+      {...getFormProps(form)}
+      className={className}
+    >
       <input type="hidden" name="theme" value={nextMode} />
       <button type="submit" name="intent" value="update-theme">
         {modeLabel[mode]}

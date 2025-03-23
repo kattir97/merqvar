@@ -3,11 +3,10 @@ import { createCookieSessionStorage } from "react-router";
 export const toastSessionStorage = createCookieSessionStorage({
   cookie: {
     name: "dc_toast",
-    sameSite: 'lax',
-    path: '/',
-    httpOnly: 'true',
+    sameSite: "lax",
+    path: "/",
+    httpOnly: true,
     // secure: process.env.NODE_ENV === 'production',
-    secretes: process.env.SESSION_SECRET.split(',')
-  }
+    secrets: process.env.SESSION_SECRET.split(","),
+  },
 });
-

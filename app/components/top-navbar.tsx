@@ -1,11 +1,18 @@
-import { Link, NavLink, useNavigate } from "react-router";
-import { ThemeSwitch } from "../routes/theme-switch";
+import {
+  Link,
+  NavLink,
+  useActionData,
+  useLoaderData,
+  useNavigate,
+} from "react-router";
+import { action, loader, ThemeSwitch } from "../routes/theme-switch";
 import { Theme } from "~/types/theme";
 import { useOptionalUser } from "~/utils/user";
-import { MonitorCog, User } from "lucide-react";
+import { Menu, MonitorCog, User, X } from "lucide-react";
 import { Badge } from "./ui/badge";
 import "@fontsource/anta";
-import { Button } from "./ui/button";
+import { useState } from "react";
+import { Card } from "./ui/card";
 
 const TopNavbar = ({
   theme,
@@ -15,6 +22,7 @@ const TopNavbar = ({
   hasAdminAccess: boolean;
 }) => {
   const user = useOptionalUser();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const clearSearchInput = () => {
     const searchEl = document.getElementById("searchInput") as HTMLInputElement;
@@ -26,13 +34,17 @@ const TopNavbar = ({
 
   return (
     <nav className="flex justify-between items-center shadow-sm p-3 border-b h-[4rem]">
-      <Link to="/" className="font-anta text-xl" onClick={clearSearchInput}>
+      <Link
+        to="/"
+        className="font-anta text-sm md:text-lg lg:text-xl"
+        onClick={clearSearchInput}
+      >
         Merqvar
       </Link>
 
       <ThemeSwitch userPreference={theme} />
-
-      <div className="flex gap-2">
+      {/* Desktop nav hidden on mobile */}
+      <div className="hidden md:flex gap-2">
         {user ? (
           <NavLink to="/profile">
             <Badge variant="secondary" className="p-2 gap-2">
@@ -51,6 +63,44 @@ const TopNavbar = ({
           </NavLink>
         ) : null}
       </div>
+
+      {/* Mobile Menu Toggle */}
+      <button
+        className="md:hidden"
+        type="button"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+      >
+        {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+
+      {/* Mobile Menu Dropdown */}
+      {isMenuOpen && (
+        <Card
+          className="fixed top-16 left-0 right-0  p-4 shadow-md z-50
+          flex flex-col items-stretch rounded-none"
+        >
+          <NavLink to="/profile" onClick={() => setIsMenuOpen(false)}>
+            <Badge
+              variant="secondary"
+              className="p-2 gap-2 mb-2 flex justify-center"
+            >
+              <User />
+              <span>{user?.username}</span>
+            </Badge>
+          </NavLink>
+          {hasAdminAccess && (
+            <NavLink to="/admin" onClick={() => setIsMenuOpen(false)}>
+              <Badge
+                variant="secondary"
+                className="p-2 gap-2 mb-2 flex justify-center"
+              >
+                <MonitorCog />
+                <span>Admin</span>
+              </Badge>
+            </NavLink>
+          )}
+        </Card>
+      )}
     </nav>
   );
 };

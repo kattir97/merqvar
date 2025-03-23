@@ -33,7 +33,16 @@ export default function Index() {
   const query = searchParams.get("query");
   const hasResults = results.length > 0;
 
-  const resultsUiState = query && !hasResults ? "Слово не найдено" : "";
+  const noWordFound = (
+    <div className="flex items-center justify-center mt-10 text-lg">
+      <div className="flex flex-col items-center justify-center">
+        <SearchX size="40" />
+        <span>Слово не найдено</span>
+      </div>
+    </div>
+  );
+
+  const resultsUiState = query && !hasResults ? noWordFound : "";
 
   return (
     <Container>
@@ -65,12 +74,7 @@ export default function Index() {
             ))}
           </ul>
         ) : (
-          <div className="flex items-center justify-center mt-10 text-lg">
-            <div className="flex flex-col items-center justify-center">
-              <SearchX size="40" />
-              {resultsUiState}
-            </div>
-          </div>
+          resultsUiState
         )}
       </div>
     </Container>

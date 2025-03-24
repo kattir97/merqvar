@@ -87,11 +87,6 @@ export async function action({ request }: ActionFunctionArgs) {
     );
   }
 
-  // Handle non-submit intents (e.g., validation-only requests)
-  // if (submission.intent !== "submit") {
-  //   return json({ status: "idle", submission });
-  // }
-
   // If validation fails, return an error response
   if (!submission.value?.session) {
     return data(
@@ -222,7 +217,7 @@ export default function RegisterPage() {
           >
             Sign Up
           </StatusButton>
-          <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+          {/* <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
             <span className="relative z-10 bg-background px-2 text-muted-foreground">
               Or continue with
             </span>
@@ -230,7 +225,7 @@ export default function RegisterPage() {
 
           <StatusButton status="idle" variant="outline" className="w-full">
             GitHub
-          </StatusButton>
+          </StatusButton> */}
         </div>
         <div className="text-center text-sm">
           Already have an account?{" "}

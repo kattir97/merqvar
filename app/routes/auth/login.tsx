@@ -49,11 +49,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const submission = await parseWithZod(formData, {
     schema: loginSchema.transform(async (data, ctx) => {
-      // const user = await prisma.user.findUnique({
-      //   select: { id: true, password: true },
-      //   where: { email: data.email },
-      // });
-
       const { email, password } = data;
 
       const session = await login({ email, password });
@@ -67,20 +62,6 @@ export async function action({ request }: ActionFunctionArgs) {
         return z.NEVER;
       }
 
-      // const pswd = data.password;
-      // const hash = user.password?.hash;
-
-      // const isValid = await bcrypt.compare(pswd, hash);
-
-      // if (!isValid) {
-      //   ctx.addIssue({
-      //     code: "custom",
-      //     message: "Неверный адрес электронной почты или пароль",
-      //     path: ["global"],
-      //   });
-      //   return z.NEVER;
-      // }
-
       return { ...data, session };
     }),
     async: true,
@@ -93,11 +74,6 @@ export async function action({ request }: ActionFunctionArgs) {
   if (submission.status !== "success") {
     return { status: "error", submission };
   }
-
-  // Handle non-submit intents (e.g., validation-only requests)
-  // if (submission.intent !== "submit") {
-  //   return json({ status: "idle", submission });
-  // }
 
   // If validation fails, return an error response
   if (!submission.value?.session) {
@@ -207,12 +183,12 @@ export default function LoginPage() {
               <Checkbox id={fields.remember.id} name={fields.remember.name} />
               <label htmlFor={fields.remember.id}>Remember me</label>
             </div>
-            <Link
+            {/* <Link
               to="#"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
-            </Link>
+            </Link> */}
           </div>
           <ErrorList id={form.errorId} errors={globalError} />
           <StatusButton
@@ -222,13 +198,13 @@ export default function LoginPage() {
           >
             Login
           </StatusButton>
-          <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+          {/* <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
             <span className="relative z-10 bg-background px-2 text-muted-foreground">
               Or continue with
             </span>
           </div>
 
-          <StatusButton status="idle">Login with GitHub</StatusButton>
+          <StatusButton status="idle">Login with GitHub</StatusButton> */}
         </div>
         <div className="text-center text-sm">
           Don&apos;t have an account?{" "}

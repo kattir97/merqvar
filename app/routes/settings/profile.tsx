@@ -34,7 +34,7 @@ export default function Profile() {
     .filter(Boolean);
 
   return (
-    <div className="m-auto pb-24 mt-16 max-w-3xl">
+    <div className="m-auto pb-24 mt-10 md:mt-16 max-w-3xl p-4">
       <div className="container">
         <Breadcrumb>
           <BreadcrumbList>
@@ -55,7 +55,7 @@ export default function Profile() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <Spacer size="xs" />
+      <Spacer size="3xs" />
       <Card className="mx-auto  px-6 py-8 md:container md:rounded-3xl">
         <Outlet />
       </Card>

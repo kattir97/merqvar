@@ -95,10 +95,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     csrfToken,
   };
 
-  // return new Response(JSON.stringify(data), {
-  //   headers: csrfCookieHeader ? { "set-cookie": csrfCookieHeader } : {},
-  // });
-  //
   return data(loaderData, {
     headers: csrfCookieHeader ? { "set-cookie": csrfCookieHeader } : {},
   });

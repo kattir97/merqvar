@@ -55,13 +55,19 @@ const TopNavbar = ({
       </div>
 
       {/* Mobile Menu Toggle */}
-      <button
-        className="md:hidden"
-        type="button"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-      >
-        {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
+      {user ? (
+        <button
+          className="md:hidden"
+          type="button"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
+        </button>
+      ) : null}
 
       {/* Mobile Menu Dropdown */}
       {isMenuOpen && (

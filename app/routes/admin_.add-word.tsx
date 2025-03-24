@@ -10,7 +10,12 @@ import {
 } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { getFormProps, getInputProps, SubmissionResult, useForm } from "@conform-to/react";
+import {
+  getFormProps,
+  getInputProps,
+  SubmissionResult,
+  useForm,
+} from "@conform-to/react";
 import { z } from "zod";
 import { getZodConstraint, parseWithZod } from "@conform-to/zod";
 import { ErrorList } from "~/components/error-list";
@@ -78,7 +83,19 @@ export default function AddWord() {
 
   return (
     <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full my-10">
-      <h1 className="mb-4 text-xl">Добавить слово</h1>
+      <div className="flex mb-10 md:hidden">
+        <Link to="/admin" className="mt-auto">
+          <Button
+            variant="secondary"
+            type="submit"
+            className="flex gap-2 w-full"
+          >
+            <CornerDownLeft size={18} />
+            Вернуться назад
+          </Button>
+        </Link>
+      </div>
+      <h1 className="mb-4 text-center text-xl">Добавить слово</h1>
       <Form method="POST" {...getFormProps(form)} className="flex-grow">
         <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
@@ -86,22 +103,37 @@ export default function AddWord() {
               <Label htmlFor={fields.headword.id} className="sr-only">
                 Слово
               </Label>
-              <Input {...getInputProps(fields.headword, { type: "text" })} placeholder="Слово" />
-              <ErrorList id={fields.headword.errorId} errors={fields.headword.errors} />
+              <Input
+                {...getInputProps(fields.headword, { type: "text" })}
+                placeholder="Слово"
+              />
+              <ErrorList
+                id={fields.headword.errorId}
+                errors={fields.headword.errors}
+              />
             </fieldset>
             <fieldset>
               <Label htmlFor={fields.root.id} className="sr-only">
                 Корень
               </Label>
-              <Input {...getInputProps(fields.root, { type: "text" })} placeholder="Корень" />
+              <Input
+                {...getInputProps(fields.root, { type: "text" })}
+                placeholder="Корень"
+              />
               <ErrorList id={fields.root.errorId} errors={fields.root.errors} />
             </fieldset>
             <fieldset>
               <Label htmlFor={fields.ergative.id} className="sr-only">
                 Эргатив
               </Label>
-              <Input {...getInputProps(fields.ergative, { type: "text" })} placeholder="Эргатив" />
-              <ErrorList id={fields.ergative.errorId} errors={fields.ergative.errors} />
+              <Input
+                {...getInputProps(fields.ergative, { type: "text" })}
+                placeholder="Эргатив"
+              />
+              <ErrorList
+                id={fields.ergative.errorId}
+                errors={fields.ergative.errors}
+              />
             </fieldset>
             <fieldset>
               <SpeechPart form={form} fields={fields} />
@@ -115,9 +147,13 @@ export default function AddWord() {
         <h2 className="mb-2">Примеры: </h2>
         <Examples form={form} fields={fields} />
       </Form>
-      <div className=" flex justify-end gap-4  my-10 ">
-        <Link to="/admin">
-          <Button variant="outline" type="submit" className="flex gap-2">
+      <div className="flex flex-col md:flex-row justify-center md:justify-end gap-4 my-10">
+        <Link to="/admin" className="mt-auto hidden md:block">
+          <Button
+            variant="secondary"
+            type="submit"
+            className="flex gap-2 w-full"
+          >
             <CornerDownLeft size={18} />
             Вернуться назад
           </Button>
@@ -130,6 +166,7 @@ export default function AddWord() {
           status={isSubmitting ? "pending" : "idle"}
           name="intent"
           value="add-word"
+          className="py-5 md:py-0"
         >
           Добавить слово
         </StatusButton>

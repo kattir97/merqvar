@@ -122,7 +122,19 @@ export default function EditWord() {
 
   return (
     <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full my-10">
-      <h1 className="mb-4 text-xl">Изменить слово</h1>
+      <div className="flex mb-10 md:hidden">
+        <Link to="/admin" className="mt-auto">
+          <Button
+            variant="secondary"
+            type="submit"
+            className="flex gap-2 w-full"
+          >
+            <CornerDownLeft size={18} />
+            Вернуться назад
+          </Button>
+        </Link>
+      </div>
+      <h1 className="mb-4 text-center text-xl">Изменить слово</h1>
       <Form method="POST" {...getFormProps(form)} className="flex-grow">
         <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
@@ -174,9 +186,13 @@ export default function EditWord() {
         <h2 className="mb-2">Примеры: </h2>
         <Examples form={form} fields={fields} />
       </Form>
-      <div className=" flex justify-end gap-4  my-10 ">
-        <Link to="/admin">
-          <Button variant="outline" type="submit" className="flex gap-2">
+      <div className="flex flex-col md:flex-row justify-center md:justify-end gap-4 my-10">
+        <Link to="/admin" className="mt-auto hidden md:block">
+          <Button
+            variant="secondary"
+            type="submit"
+            className="flex gap-2 w-full"
+          >
             <CornerDownLeft size={18} />
             Вернуться назад
           </Button>
@@ -189,6 +205,7 @@ export default function EditWord() {
           status={isSubmitting ? "pending" : "idle"}
           name="intent"
           value="add-word"
+          className="py-5 md:py-0"
         >
           Изменить слово
         </StatusButton>

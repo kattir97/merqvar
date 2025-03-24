@@ -1,4 +1,9 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -10,7 +15,7 @@ import {
 } from "~/components/ui/table";
 import { Pagination } from "./pagination";
 import { useNavigation, useNavigate, Form, NavLink } from "react-router";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -78,9 +83,9 @@ export function DataTable<TData, TValue>({
     event.preventDefault();
     // Update the URL with the new filter, maintaining page, pageSize, sortBy, and order
     navigate(
-      `?page=${(page = 1)}&pageSize=${pageSize}&sortBy=${sorting.sortBy}&order=${
-        sorting.order
-      }&filter=${encodeURIComponent(filter)}`
+      `?page=${(page = 1)}&pageSize=${pageSize}&sortBy=${
+        sorting.sortBy
+      }&order=${sorting.order}&filter=${encodeURIComponent(filter)}`
     );
 
     // setFilter("");
@@ -88,7 +93,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className={isLoading ? "opacity-50" : "opacity-100"}>
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between py-4 gap-4 md:gap-0">
         <Form onSubmit={handleFilterChange} className="flex flex-1">
           <Input
             placeholder="Искать..."
@@ -100,7 +105,8 @@ export function DataTable<TData, TValue>({
         </Form>
         <NavLink to="add-word">
           <Button variant="default" disabled={isLoading}>
-            Добавить слово
+            <span className="hidden sm:block">Добавить слово</span>
+            <Plus className="sm:hidden" />
           </Button>
         </NavLink>
       </div>
@@ -121,7 +127,10 @@ export function DataTable<TData, TValue>({
                           disabled={!header.column.columnDef.enableSorting} // Disable sorting on non-sortable columns
                           className="flex items-center"
                         >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                           {/* Sorting indicator only for client-side */}
                           {/* Always render arrows, but adjust visibility */}
                           <span className="ml-2">
@@ -147,17 +156,26 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   Ничего не найдено.
                 </TableCell>
               </TableRow>

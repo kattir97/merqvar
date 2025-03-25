@@ -7,6 +7,7 @@ import { TagType, WordServerType } from "~/types/types";
 import { SearchX } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { prisma } from "~/utils/db.server";
+import { useEffect, useState } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,10 +20,20 @@ export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const query = url.searchParams.get("query");
 
-  const searchByTag = async (tagName: string) => {
-    const tag = tagName.replace("#", "");
+  const searchByTag = async (tagNames: string[]) => {
+    const tags = tagNames
+      .map((tag) => tag.replace("#", "").trim())
+      .filter(Boolean);
+
     const data = await prisma.word.findMany({
-      where: { tags: { some: { name: tag } } },
+      where: {
+        tags: {
+          some: {
+            // Use 'some' for "any of these tags"; use 'every' for "all of these tags"
+            name: { in: tags },
+          },
+        },
+      },
       include: {
         translations: true,
         examples: true,
@@ -37,8 +48,9 @@ export const loader: LoaderFunction = async ({ request }) => {
     return [];
   }
 
-  if (query.startsWith("#")) {
-    return await searchByTag(query);
+  if (query.includes("#")) {
+    const tags = query.split(" ").filter((t) => t.startsWith("#"));
+    return await searchByTag(tags);
   } else {
     return await fullTextSearch(query);
   }
@@ -47,15 +59,24 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Index() {
   const results = useLoaderData<WordServerType[]>();
   const navigate = useNavigate();
-
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query");
   const hasResults = results.length > 0;
+  const intialTags = query?.split(" ").filter((t) => t.startsWith("#"));
+
+  const [selectedTags, setSelectedTags] = useState(intialTags ?? []);
 
   const handleTagClick = (tagName: string) => {
     // Update URL with the selected tag, clearing any existing query
-    const tagWithHash = `#${tagName}`;
-    navigate(`/?query=${encodeURIComponent(tagWithHash)}`, { replace: true });
+    const newTags = selectedTags.includes(tagName)
+      ? selectedTags.filter((t) => t !== tagName)
+      : [...selectedTags, tagName];
+
+    setSelectedTags(newTags);
+
+    const tagQuery = newTags.join(" ");
+
+    navigate(`/?query=${encodeURIComponent(tagQuery)}`, { replace: true });
   };
 
   const noWordFound = (
@@ -68,6 +89,13 @@ export default function Index() {
   );
 
   const resultsUiState = query && !hasResults ? noWordFound : "";
+
+  // Sync selectedTags with query when it changes (e.g., from SearchBar)
+  useEffect(() => {
+    const tagsFromQuery =
+      query?.split(" ").filter((t) => t.startsWith("#")) ?? [];
+    setSelectedTags(tagsFromQuery);
+  }, [query]);
 
   return (
     <Container>
@@ -105,7 +133,7 @@ export default function Index() {
                           key={tag.id}
                           className="cursor-pointer"
                           variant="secondary"
-                          data-value={tag.name}
+                          data-value={`#${tag.name}`}
                           onClick={(e) =>
                             handleTagClick(
                               e.currentTarget.getAttribute("data-value") ?? ""

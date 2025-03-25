@@ -15,8 +15,6 @@ export async function saveWord(
     .map((key) => formData[key] as string)
     .filter((tag) => tag.trim() !== ""); // Remove empty tags
 
-  console.log("tags", tags);
-
   // Parse `examples` into an array of objects with `example` and `translation`
   const examples = Object.keys(formData)
     .filter((key) => key.startsWith("examples"))

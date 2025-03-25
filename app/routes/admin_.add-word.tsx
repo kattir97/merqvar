@@ -30,7 +30,6 @@ import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
 import { requireUserWithRole } from "~/utils/permissions";
 import Tags from "~/components/tags";
-import { useState } from "react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireUserWithRole(request, ["admin", "moderator"]);
@@ -42,7 +41,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const submission = parseWithZod(formData, { schema: wordSchema });
   const data = Object.fromEntries(formData.entries());
-  console.log("data", data);
 
   // Report the submission to client if it is not successful
   if (submission.status !== "success") {

@@ -16,7 +16,7 @@ interface TagsProps {
   fields: UseFormReturnType[1];
 }
 
-export default function Tags({ form, fields }: TagsProps) {
+export default function Tags({ fields }: TagsProps) {
   const [tags, setTags] = useState(fields.tags.getFieldList());
   // const tags = fields.tags.getFieldList();
   const [newTag, setNewTag] = useState("");
@@ -39,7 +39,6 @@ export default function Tags({ form, fields }: TagsProps) {
 
       setTags([...tags, tagObj]);
       setNewTag(""); // Clear the input after adding
-      console.log("tags", tags);
     }
   };
 

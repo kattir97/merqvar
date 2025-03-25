@@ -32,6 +32,7 @@ import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
 import { requireUserWithRole } from "~/utils/permissions";
+import Tags from "~/components/tags";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   await requireUserWithRole(request, ["admin", "moderator"]);
@@ -117,11 +118,13 @@ export default function EditWord() {
                 translation: "",
               },
             ],
+
+      tags: loaderData?.tags.map((tag) => tag.name),
     },
   });
 
   return (
-    <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full my-10">
+    <div className="flex flex-col md:max-w-5xl p-4 mx-auto min-h-full py-10">
       <div className="flex mb-10 md:hidden">
         <Link to="/admin" className="mt-auto">
           <Button
@@ -135,7 +138,11 @@ export default function EditWord() {
         </Link>
       </div>
       <h1 className="mb-4 text-center text-xl">Изменить слово</h1>
-      <Form method="POST" {...getFormProps(form)} className="flex-grow">
+      <Form
+        method="POST"
+        {...getFormProps(form)}
+        className="flex flex-col gap-4"
+      >
         <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
             <fieldset>
@@ -185,6 +192,7 @@ export default function EditWord() {
         </div>
         <h2 className="mb-2">Примеры: </h2>
         <Examples form={form} fields={fields} />
+        <Tags form={form} fields={fields} />
       </Form>
       <div className="flex flex-col md:flex-row justify-center md:justify-end gap-4 my-10">
         <Link to="/admin" className="mt-auto hidden md:block">

@@ -1,16 +1,25 @@
 import { Search } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Form, useSearchParams } from "react-router";
+import { Form } from "react-router";
+import { useEffect, useState } from "react";
 
 type SearchBarProps = {
   height?: "h-8" | "h-9" | "h-10" | "h-11" | "h-12";
-  defaultQuery?: string;
+  searchQuery: string;
 };
 
-export const SearchBar = ({ height = "h-12" }: SearchBarProps) => {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get("query") || "";
+export const SearchBar = ({ height = "h-12", searchQuery }: SearchBarProps) => {
+  const [inputValue, setInputValue] = useState(searchQuery);
+
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+  };
 
   return (
     <Form method="GET" action="/">
@@ -18,7 +27,8 @@ export const SearchBar = ({ height = "h-12" }: SearchBarProps) => {
         <Input
           className="h-full text-lg border-zinc-400"
           spellCheck={false}
-          defaultValue={query}
+          value={inputValue}
+          onChange={handleChange}
           name="query"
           id="searchInput"
         />

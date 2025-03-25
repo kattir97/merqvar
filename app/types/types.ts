@@ -9,6 +9,12 @@ export const serverResponseSchema = wordSchema.extend({
       translation: z.string({ required_error: "Требуется перевод" }).min(1),
     })
   ),
+  tags: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+    })
+  ),
 });
 
 export const columnWordSchema = wordSchema.extend({
@@ -32,6 +38,11 @@ export type ExampleType = {
   id: string;
   example: string;
   translation: string;
+};
+
+export type TagType = {
+  id: string;
+  name: string;
 };
 
 export type RoleName = "admin" | "moderator" | "user";

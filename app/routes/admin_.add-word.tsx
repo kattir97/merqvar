@@ -29,6 +29,7 @@ import { CornerDownLeft } from "lucide-react";
 import { StatusButton } from "~/components/ui/status-button";
 import { wordSchema } from "~/types/word-schema";
 import { requireUserWithRole } from "~/utils/permissions";
+import Tags from "~/components/tags";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   await requireUserWithRole(request, ["admin", "moderator"]);
@@ -57,6 +58,7 @@ export default function AddWord() {
   const lastResult = useActionData<typeof action>();
   const navigation = useNavigation();
   const formAction = useFormAction();
+
   const isSubmitting =
     navigation.state === "submitting" &&
     navigation.formAction === formAction &&
@@ -78,6 +80,7 @@ export default function AddWord() {
           translation: "",
         },
       ],
+      // tags: [""],
     },
   });
 
@@ -96,7 +99,11 @@ export default function AddWord() {
         </Link>
       </div>
       <h1 className="mb-4 text-center text-xl">Добавить слово</h1>
-      <Form method="POST" {...getFormProps(form)} className="flex-grow">
+      <Form
+        method="POST"
+        {...getFormProps(form)}
+        className="flex flex-col  gap-4"
+      >
         <div className="grid md:grid-cols-2 gap-2 mb-6">
           <div className="flex flex-col gap-2">
             <fieldset>
@@ -146,6 +153,7 @@ export default function AddWord() {
         </div>
         <h2 className="mb-2">Примеры: </h2>
         <Examples form={form} fields={fields} />
+        <Tags form={form} fields={fields} />
       </Form>
       <div className="flex flex-col md:flex-row justify-center md:justify-end gap-4 my-10">
         <Link to="/admin" className="mt-auto hidden md:block">

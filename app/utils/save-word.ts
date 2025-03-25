@@ -10,6 +10,13 @@ export async function saveWord(
     .filter((key) => key.startsWith("translations["))
     .map((key) => ({ translation: formData[key] } as { translation: string }));
 
+  const tags = Object.keys(formData)
+    .filter((key) => key.startsWith("tags["))
+    .map((key) => formData[key] as string)
+    .filter((tag) => tag.trim() !== ""); // Remove empty tags
+
+  console.log("tags", tags);
+
   // Parse `examples` into an array of objects with `example` and `translation`
   const examples = Object.keys(formData)
     .filter((key) => key.startsWith("examples"))
@@ -39,6 +46,26 @@ export async function saveWord(
     return exampleTrimmed !== "" || translationTrimmed !== "";
   });
 
+  // Handle tags: Create or connect them
+  const tagOperations = await Promise.all(
+    tags.map(async (tagName) => {
+      // Check if the tag exists
+      const existingTag = await prisma.tag.findUnique({
+        where: { name: tagName },
+      });
+
+      if (existingTag) {
+        return { id: existingTag.id }; // Connect existing tag
+      } else {
+        // Create new tag and return its ID
+        const newTag = await prisma.tag.create({
+          data: { name: tagName },
+        });
+        return { id: newTag.id };
+      }
+    })
+  );
+
   const wordData = {
     headword: headword as string,
     root: root as string,
@@ -50,6 +77,9 @@ export async function saveWord(
     },
     examples: {
       create: filteredExamples,
+    },
+    tags: {
+      connect: tagOperations,
     },
   };
 
@@ -66,6 +96,9 @@ export async function saveWord(
         examples: {
           deleteMany: {}, // Delete existing examples
           create: filteredExamples,
+        },
+        tags: {
+          set: tagOperations, // Replace existing tags with the new set
         },
       },
     });

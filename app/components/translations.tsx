@@ -3,9 +3,9 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ErrorList } from "./error-list";
 import { useForm } from "@conform-to/react";
-import { wordSchema } from "~/routes/admin_.add-word";
 import { z } from "zod";
 import { useState } from "react";
+import { wordSchema } from "~/types/word-schema";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 
@@ -18,7 +18,9 @@ interface TranslationsProps {
 
 export const Translations = ({ fields }: TranslationsProps) => {
   // const translations = fields.translations.getFieldList();
-  const [translations, setTranslations] = useState(fields.translations.getFieldList());
+  const [translations, setTranslations] = useState(
+    fields.translations.getFieldList()
+  );
 
   const handleAddTranslation = (event: React.MouseEvent) => {
     event.preventDefault(); // Prevent default form submission

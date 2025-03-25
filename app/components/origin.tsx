@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { OriginEnum } from "~/enums/origin-enum";
-import { wordSchema } from "~/routes/admin_.add-word";
+import { wordSchema } from "~/types/word-schema";
 
 type WordFormFields = z.infer<typeof wordSchema>;
 

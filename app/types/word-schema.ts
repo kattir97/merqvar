@@ -50,7 +50,7 @@ export const wordSchema = z.object({
       })
       .refine((obj) => obj.example.trim() || obj.translation?.trim())
   ),
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.string().min(1, "Tag cannot be empty")).optional(),
   createdAt: z.string().optional(),
 });
 

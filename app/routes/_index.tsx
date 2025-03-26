@@ -107,13 +107,11 @@ export default function Index() {
           <ul>
             {results.map((word: WordServerType) => (
               <Card
-                className="border bg-gray-50 rounded-lg shadow-sm p-4 my-4"
+                className="border bg-gray-50 rounded-lg shadow-sm p-4 my-4 text-gray-700"
                 key={word.id}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-gray-700">
-                    {word.headword}
-                  </span>
+                  <span className="text-2xl font-bold">{word.headword}</span>
                   {/* <button onClick={() => playAudio(word.audioUrl)}>🔊</button> */}
 
                   {" - "}
@@ -126,7 +124,7 @@ export default function Index() {
                   {word.examples?.map((ex, id) => (
                     <blockquote
                       key={id}
-                      className="border-l-4 border-blue-900 pl-3 italic text-gray-700"
+                      className="border-l-4 border-blue-900 pl-3 italic"
                     >
                       💬 <b>{ex.example}</b> — {ex.translation}
                     </blockquote>
@@ -140,7 +138,8 @@ export default function Index() {
                       return (
                         <Badge
                           key={tag.id}
-                          className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 hover:bg-gray-300 cursor-pointer"
+                          className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200
+                          hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 cursor-pointer"
                           variant="secondary"
                           data-value={`#${tag.name}`}
                           onClick={(e) =>

@@ -19,7 +19,7 @@ import { z } from "zod";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { StatusButton } from "~/components/ui/status-button";
-import { cn } from "~/lib/utils";
+import { cn, invariantResponse } from "~/lib/utils";
 import { ErrorList } from "~/components/error-list";
 import { EmailSchema, PasswordSchema } from "~/utils/user-validation";
 import { sessionStorage } from "~/utils/session.server";
@@ -27,6 +27,9 @@ import { useState } from "react";
 import { Checkbox } from "~/components/ui/checkbox";
 import { login, requireAnonymous, sessionKey } from "~/utils/auth.server";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
+import { applyRateLimit } from "~/utils/rate-limit.server";
+import { GeneralErrorBoundary } from "~/components/error-boundary";
+import { rateLimitHandler } from "~/utils/error-handlers";
 
 const loginSchema = z.object({
   email: EmailSchema,
@@ -43,7 +46,17 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return {};
 }
 
+const requestTimestamps = new Map<string, number[]>();
 export async function action({ request }: ActionFunctionArgs) {
+  const rateLimitResponse = applyRateLimit({
+    request,
+    store: requestTimestamps,
+  });
+
+  if (rateLimitResponse) {
+    throw rateLimitResponse;
+  }
+
   await requireAnonymous(request);
   const formData = await request.formData();
 
@@ -215,4 +228,8 @@ export default function LoginPage() {
       </Form>
     </div>
   );
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary statusHandlers={{ 429: rateLimitHandler }} />;
 }

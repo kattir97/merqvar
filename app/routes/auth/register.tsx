@@ -31,6 +31,7 @@ import {
 import { sessionStorage } from "~/utils/session.server";
 import { requireAnonymous, sessionKey, signup } from "~/utils/auth.server";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
+import { applyRateLimit } from "~/utils/rate-limit.server";
 
 const registerSchema = z.object({
   email: EmailSchema,
@@ -43,7 +44,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return {};
 }
 
+const requestTimestamps = new Map<string, number[]>();
+
 export async function action({ request }: ActionFunctionArgs) {
+  const rateLimitResponse = applyRateLimit({
+    request,
+    store: requestTimestamps,
+  });
+
+  if (rateLimitResponse) return rateLimitResponse;
+
   await requireAnonymous(request);
   const formData = await request.formData();
   invariantResponse(formData.get("name") === "", "form not submited properly");

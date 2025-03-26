@@ -32,6 +32,8 @@ import { sessionStorage } from "~/utils/session.server";
 import { requireAnonymous, sessionKey, signup } from "~/utils/auth.server";
 import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { applyRateLimit } from "~/utils/rate-limit.server";
+import { GeneralErrorBoundary } from "~/components/error-boundary";
+import { rateLimitHandler } from "~/utils/error-handlers";
 
 const registerSchema = z.object({
   email: EmailSchema,
@@ -52,7 +54,9 @@ export async function action({ request }: ActionFunctionArgs) {
     store: requestTimestamps,
   });
 
-  if (rateLimitResponse) return rateLimitResponse;
+  if (rateLimitResponse) {
+    throw rateLimitResponse;
+  }
 
   await requireAnonymous(request);
   const formData = await request.formData();
@@ -246,4 +250,8 @@ export default function RegisterPage() {
       </Form>
     </div>
   );
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary statusHandlers={{ 429: rateLimitHandler }} />;
 }

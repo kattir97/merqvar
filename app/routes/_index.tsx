@@ -8,6 +8,7 @@ import { SearchX } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { prisma } from "~/utils/db.server";
 import { useEffect, useState } from "react";
+import { Card } from "~/components/ui/card";
 
 export const meta: MetaFunction = () => {
   return [
@@ -105,33 +106,41 @@ export default function Index() {
         {query && results.length > 0 ? (
           <ul>
             {results.map((word: WordServerType) => (
-              <div className="border rounded-md p-2 my-2" key={word.id}>
-                <span className="text-2xl font-semibold">{word.headword}</span>
-                {" - "}
-                <span className="italic">
-                  {word.translations.map((tr) => tr.translation).join(", ")}
-                </span>
-                <div className="mt-4">
-                  <span className="italic">примеры:</span>
-                  <ul>
-                    {word.examples?.map((ex, id) => {
-                      return (
-                        <li key={id}>
-                          {ex.example} - {ex.translation}
-                        </li>
-                      );
-                    })}
-                  </ul>
+              <Card
+                className="border bg-gray-50 rounded-lg shadow-sm p-4 my-4"
+                key={word.id}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-gray-700">
+                    {word.headword}
+                  </span>
+                  {/* <button onClick={() => playAudio(word.audioUrl)}>🔊</button> */}
+
+                  {" - "}
+                  <span className="italic">
+                    {word.translations.map((tr) => tr.translation).join(", ")}
+                  </span>
+                </div>
+
+                <div className="mt-2 space-y-2">
+                  {word.examples?.map((ex, id) => (
+                    <blockquote
+                      key={id}
+                      className="border-l-4 border-blue-900 pl-3 italic text-gray-700"
+                    >
+                      💬 <b>{ex.example}</b> — {ex.translation}
+                    </blockquote>
+                  ))}
                 </div>
 
                 <div className="mt-4 flex flex-col gap-2">
-                  <span className="italic">теги:</span>
+                  {/* <span className="italic">теги:</span */}
                   <div className="flex gap-2">
                     {word.tags?.map((tag: TagType) => {
                       return (
                         <Badge
                           key={tag.id}
-                          className="cursor-pointer"
+                          className="px-3 py-1 rounded-full text-sm font-medium bg-gray-200 hover:bg-gray-300 cursor-pointer"
                           variant="secondary"
                           data-value={`#${tag.name}`}
                           onClick={(e) =>
@@ -146,7 +155,7 @@ export default function Index() {
                     })}
                   </div>
                 </div>
-              </div>
+              </Card>
             ))}
           </ul>
         ) : (

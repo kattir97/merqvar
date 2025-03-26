@@ -103,7 +103,7 @@ export default function Index() {
       <SearchBar searchQuery={query ?? ""} />
 
       <div className="my-5">
-        {query && results.length > 0 ? (
+        {query && hasResults ? (
           <ul>
             {results.map((word: WordServerType) => (
               <Card

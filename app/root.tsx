@@ -91,7 +91,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     theme: getTheme(request),
     ENV: getEnv(),
     hasAdminAcess,
-    honeypotInputProps: honeypot.getInputProps(),
+    honeypotInputProps: await honeypot.getInputProps(),
     csrfToken,
   };
 
@@ -110,6 +110,7 @@ function useTheme() {
   if (optimisticTheme === "light" || optimisticTheme === "dark") {
     return optimisticTheme;
   }
+
   return data.theme;
 }
 

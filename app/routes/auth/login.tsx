@@ -30,6 +30,7 @@ import { HoneypotInputs } from "remix-utils/honeypot/react";
 import { applyRateLimit } from "~/utils/rate-limit.server";
 import { GeneralErrorBoundary } from "~/components/error-boundary";
 import { rateLimitHandler } from "~/utils/error-handlers";
+import { checkHoneypot } from "~/utils/honeypot.server";
 
 const loginSchema = z.object({
   email: EmailSchema,
@@ -59,6 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   await requireAnonymous(request);
   const formData = await request.formData();
+  checkHoneypot(formData);
 
   const submission = await parseWithZod(formData, {
     schema: loginSchema.transform(async (data, ctx) => {
